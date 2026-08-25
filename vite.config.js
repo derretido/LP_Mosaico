@@ -1,10 +1,6 @@
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 
-/*
-    O build existe só para compilar o efeito da hero (React + Three.js)
-   num único módulo em assets/efeito/. */
-
 
 export default defineConfig({
   plugins: [react()],

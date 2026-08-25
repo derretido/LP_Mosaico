@@ -1,0 +1,6 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "framework": null,
+  "buildCommand": "vite build && mkdir -p dist && cp -R index.html 404.html robots.txt sitemap.xml assets images dist/",
+  "outputDirectory": "dist"
+}

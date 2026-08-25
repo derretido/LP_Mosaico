@@ -1,0 +1,302 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Mosaico — Barbearia e cabeleireiro</title>
+<meta name="theme-color" content="#141311">
+
+<!-- Compartilhamento. A imagem precisa virar JPG 1200x630 quando a foto real chegar. -->
+<meta property="og:type" content="website">
+<meta property="og:locale" content="pt_BR">
+<meta property="og:site_name" content="Mosaico">
+<meta property="og:title" content="Mosaico — Barbearia e cabeleireiro">
+<meta property="og:description" content="Corte, coloração e Platinado Concept. Técnica autoral, montada peça por peça.">
+<meta property="og:image" content="/assets/img/og/compartilhamento.svg">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="images/MosaicoLogo.png" type="image/png">
+<link rel="apple-touch-icon" href="/assets/icons/apple-touch-icon.png">
+<link rel="manifest" href="/assets/icons/site.webmanifest">
+<link rel="preload" href="/assets/fonts/archivo-var-latin.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/assets/fonts/instrument-serif-latin.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" as="image" type="image/avif" fetchpriority="high"
+      href="/assets/img/hero/retrato-desktop.avif" media="(min-width: 768px)">
+<link rel="preload" as="image" type="image/avif" fetchpriority="high"
+      href="/assets/img/hero/retrato-mobile.avif" media="(max-width: 767.98px)">
+<link rel="stylesheet" href="/assets/css/tokens.css">
+<link rel="stylesheet" href="/assets/css/base.css">
+<link rel="stylesheet" href="/assets/css/layout.css">
+<link rel="stylesheet" href="/assets/css/components.css">
+<link rel="stylesheet" href="/assets/css/sections.css">
+<link rel="stylesheet" href="/assets/efeito/hero-efeito.css">
+</head>
+<body>
+<div class="c-painel" id="menu-mobile" data-painel>
+  <nav aria-label="Menu principal">
+    <a class="c-painel__link" href="#platinado">Platinado</a>
+    <a class="c-painel__link" href="#servicos">Serviços</a>
+    <a class="c-painel__link" href="#portfolio">Portfólio</a>
+    <a class="c-painel__link" href="#redes">Nas redes</a>
+  </nav>
+  <div class="c-painel__rodape">
+    <a class="c-botao c-botao--primario" href="#agendar" data-cta="agendar">Agendar horário</a>
+    <a class="c-botao c-botao--terciario" href="#" data-rede="instagram">Instagram</a>
+  </div>
+</div>
+<main id="conteudo">
+  <span data-sentinela style="position:absolute;top:80px;height:1px;width:1px" aria-hidden="true"></span>
+  <section class="s s-hero t-escuro" id="inicio" data-hero data-hero-pista
+            aria-label="Retrato Mosaico">
+    <div class="s-fundo-topo s-fundo-topo--preso" data-topografia="escuro" aria-hidden="true"></div>
+    <div class="s-hero__palco" data-hero-palco>
+      <div class="s-hero__efeito" id="hero-efeito" aria-hidden="true"></div>
+      <div class="s-hero__foto" data-retrato>
+        <picture>
+          <source media="(min-width: 768px)" type="image/avif"
+                  srcset="/assets/img/hero/retrato-desktop.avif" width="1536" height="1024">
+          <source type="image/avif"
+                  srcset="/assets/img/hero/retrato-mobile.avif" width="900" height="600">
+          <img src="/assets/img/hero/retrato.png" width="1536" height="1024"
+                fetchpriority="high" decoding="async"
+                alt="Retrato frontal de homem de boné preto e óculos escuros.">
+        </picture>
+      </div>
+    </div>
+  </section>
+  <div class="c-sobrepor">
+    <section class="s s-manifesto t-escuro c-sobrepor__base" id="manifesto" data-sobrepor-base aria-labelledby="t-manifesto">
+      <div class="s-fundo-topo" data-topografia="escuro" aria-hidden="true"></div>
+      <div class="l-malha" aria-hidden="true"></div>
+      <div class="l-container">
+        <h1 id="t-manifesto" class="s-manifesto__frase" data-escrita>Corte não é padrão. É <em class="serif">desenho</em>. E todo desenho começa lendo a cabeça de quem senta na <em class="serif">cadeira</em>.</h1>
+        <div class="l-botoes s-manifesto__acoes revelar">
+          <a class="c-botao c-botao--primario" href="#agendar" data-cta="agendar">
+            Agendar horário <span class="seta" aria-hidden="true">→</span>
+          </a>
+          <a class="c-botao c-botao--secundario" href="#cursos" data-cta="curso">Quero fazer o curso</a>
+        </div>
+      </div>
+    </section>
+    <section class="s-transicao c-sobrepor__cobre" aria-label="Platinado Concept" data-sobrepor-cobre>
+      <picture>
+        <source media="(min-width: 768px)" type="image/avif"
+                srcset="/assets/img/transicao/platinado.avif" width="1600" height="777">
+        <source type="image/avif"
+                srcset="/assets/img/transicao/platinado-mobile.avif" width="900" height="437">
+        <img class="s-transicao__foto" src="/assets/img/transicao/platinado.jpeg"
+              width="1600" height="777" loading="eager" fetchpriority="low" decoding="async"
+              alt="Cinco clientes da Mosaico com o cabelo descolorido e colorido em rosa, branco, verde e azul.">
+      </picture>
+    </section>
+  </div>
+
+  <!-- ==== 4. PLATINADO CONCEPT — claro ================================= -->
+  <section class="s s-platinado" id="platinado" aria-labelledby="t-platinado">
+    <div class="s-fundo-topo" data-topografia="claro" aria-hidden="true"></div>
+    <div class="l-container">
+      <div class="l-dupla">
+        <div class="revelar">
+          <video class="s-platinado__video"
+                  width="576" height="1024"
+                  controls
+                  playsinline
+                  preload="none"
+                  poster="/assets/img/platinado/capa-video.jpg">
+            <source src="/assets/video/platinado/platinado.mp4" type="video/mp4">
+            <p class="small">Seu navegador não reproduz este vídeo.</p>
+          </video>
+        </div>
+
+        <div class="l-fluxo l-cabecalho revelar">
+          <h2 id="t-platinado">Platinado <em class="serif">concept</em></h2>
+          <p class="lead">O trabalho que mais exige leitura do fio, tempo e paciência.</p>
+          <p class="small">O platinado sem ardência é mais fácil do que você imagina, só precisa ser executado de forma correta, e eu te ajudo com isso!</p>
+          <dl class="s-platinado__processo">
+          </dl>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ==== 5. SERVIÇOS E PREÇOS — claro secundário ====================== -->
+  <section class="s s-servicos" id="servicos" aria-labelledby="t-servicos">
+    <div class="s-fundo-topo" data-topografia="claro" aria-hidden="true"></div>
+    <div class="l-container">
+      <div class="l-fluxo l-cabecalho revelar">
+        <h2 id="t-servicos">Serviços</h2>
+      </div>
+      <ul class="l-cards" style="margin-block-start: var(--sp-7)">
+        <li class="revelar">
+          <a class="c-servico c-entalhe c-servico--escuro" href="https://pay.kiwify.com.br/O2KxYQt" target="_blank" rel="noopener external">
+            <div class="c-servico__topo"><h3>Platinado Concept</h3><p class="c-servico__valor">12x de R$14,47</p></div>
+            <p>Método platinado Concept</p>
+          </a>
+        </li>
+        <li class="revelar">
+          <a class="c-servico c-entalhe c-servico--escuro" href="https://bio.zapcorte.com.br/mosaicoconcept" target="_blank" rel="noopener external">
+            <div class="c-servico__topo"><h3>Agendar Horário</h3></div>
+          </a>
+        </li>
+        <li class="revelar">
+          <a class="c-servico c-entalhe c-servico--escuro" href="https://wa.me/5511973217359?utm_source=lp" target="_blank" rel="noopener external">
+            <div class="c-servico__topo"><h3>Cursos presenciais</h3><p class="c-servico__valor"></p></div>
+            <p>Clique aqui para mais informações.</p>
+          </a>
+        </li>
+        <li class="revelar">
+          <a class="c-servico c-entalhe c-servico--escuro" href="https://pay.kiwify.com.br/cVqGiz2" target="_blank" rel="noopener external">
+            <div class="c-servico__topo"><h3>Live Criativo na tesoura</h3><p class="c-servico__valor">3x de R$5,32</p></div>
+            <p>Live Criativo na tesoura</p>
+          </a>
+        </li>
+        <li class="revelar">
+          <a class="c-servico c-entalhe c-servico--escuro" href="https://www.youtube.com/@mosaicotv23" target="_blank" rel="noopener external">
+            <div class="c-servico__topo"><h3>Mosaico Tv</h3></div>
+            <p>Canal no Youtube</p>
+          </a>
+        </li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- ==== 6. PORTFÓLIO — escuro profundo =============================== -->
+  <section class="s s-portfolio t-escuro t-profundo" id="portfolio" aria-labelledby="t-portfolio">
+    <div class="s-fundo-topo" data-topografia="escuro" aria-hidden="true"></div>
+    <div class="l-container">
+      <div class="l-fluxo l-cabecalho revelar">
+        <h2 id="t-portfolio">Trabalho <em class="serif">real</em></h2>
+      </div>
+      <ul class="c-galeria">
+          <li class="c-galeria__celula revelar">
+            <div class="c-obra--galeria">
+              <div class="c-obra__corpo">
+                <div class="c-galeria__midia">
+                  <img class="c-galeria__img c-galeria__img--secundaria" src="images/FotoC01.jpeg" width="1000" height="1250" loading="lazy" decoding="async" alt="">
+                </div>
+                <p class="c-obra__aba">
+                </p>
+              </div>
+            </div>
+          </li>
+          <li class="c-galeria__celula revelar">
+            <div class="c-obra--galeria">
+              <div class="c-obra__corpo">
+                <div class="c-galeria__midia">
+                  <img class="c-galeria__img c-galeria__img--secundaria" src="images/FotoC02.jpeg" width="1000" height="1250" loading="lazy" decoding="async" alt="">
+                  
+                </div>
+                <p class="c-obra__aba">
+                </p>
+              </div>
+            </div>
+          </li>
+          <li class="c-galeria__celula revelar">
+            <div class="c-obra--galeria">
+              <div class="c-obra__corpo">
+                <div class="c-galeria__midia">
+                  <img class="c-galeria__img c-galeria__img--secundaria" src="images/FotoC03.jpeg" width="1000" height="1250" loading="lazy" decoding="async" alt="">
+                  
+                </div>
+                <p class="c-obra__aba">
+                </p>
+              </div>
+            </div>
+          </li>
+          <li class="c-galeria__celula revelar">
+            <div class="c-obra--galeria">
+              <div class="c-obra__corpo">
+                <div class="c-galeria__midia">
+                  <img class="c-galeria__img c-galeria__img--secundaria" src="images/FotoC04.jpeg" width="1000" height="1250" loading="lazy" decoding="async" alt="">
+                  
+                </div>
+                <p class="c-obra__aba">
+                </p>
+              </div>
+            </div>
+          </li>
+          <li class="c-galeria__celula revelar">
+            <div class="c-obra--galeria">
+              <div class="c-obra__corpo">
+                <div class="c-galeria__midia">
+                  <img class="c-galeria__img c-galeria__img--secundaria" src="images/FotoC05.jpeg" width="1000" height="1250" loading="lazy" decoding="async" alt="">
+                  
+                </div>
+                <p class="c-obra__aba">
+
+                </p>
+              </div>
+            </div>
+          </li>
+          <li class="c-galeria__celula revelar">
+            <div class="c-obra--galeria">
+              <div class="c-obra__corpo">
+                <div class="c-galeria__midia">
+                  <img class="c-galeria__img c-galeria__img--secundaria" src="images/FotoC06.jpeg" width="1000" height="1250" loading="lazy" decoding="async" alt="">
+                  
+                </div>
+                <p class="c-obra__aba">
+                </p>
+              </div>
+            </div>
+          </li>
+          <li class="c-galeria__celula revelar">
+            <div class="c-obra--galeria">
+              <div class="c-obra__corpo">
+                <div class="c-galeria__midia">
+                  <img class="c-galeria__img c-galeria__img--secundaria" src="images/FotoC07.jpeg" width="1000" height="1250" loading="lazy" decoding="async" alt="">
+                  
+                </div>
+                <p class="c-obra__aba">
+                </p>
+              </div>
+            </div>
+          </li>
+          <li class="c-galeria__celula revelar">
+            <div class="c-obra--galeria">
+              <div class="c-obra__corpo">
+                <div class="c-galeria__midia">
+                  <img class="c-galeria__img c-galeria__img--secundaria" src="images/FotoC08.jpeg" width="1000" height="1250" loading="lazy" decoding="async" alt="">
+                  
+                </div>
+                <p class="c-obra__aba">
+                </p>
+              </div>
+            </div>
+          </li>
+          <li class="c-galeria__celula revelar">
+            <div class="c-obra--galeria">
+              <div class="c-obra__corpo">
+                <div class="c-galeria__midia">
+                  <img class="c-galeria__img c-galeria__img--secundaria" src="images/FotoC09.jpeg" width="1000" height="1250" loading="lazy" decoding="async" alt="">
+                </div>
+                <p class="c-obra__aba">
+                </p>
+              </div>
+            </div>
+          </li>
+      </ul>
+</section>
+  <section class="s s-redes" id="redes" aria-labelledby="t-redes" data-leque>
+    <div class="l-container">
+      <div class="l-fluxo revelar">
+        <h2 id="t-redes" data-rolagem>Mosaico <em class="serif">nas redes</em></h2>
+      </div>
+    </div>
+    <div class="c-leque" data-leque-palco aria-hidden="true"></div>
+    <div class="l-container">
+      <div class="s-redes__acoes revelar">
+        <a class="s-redes__rede rolagem--link" href="#" data-rede="instagram" data-rolagem>Instagram</a>
+        <a class="s-redes__rede rolagem--link" href="#" data-rede="tiktok" data-rolagem>TikTok</a>
+        <a class="s-redes__rede rolagem--link" href="#" data-rede="youtube" data-rolagem>Mosaico TV</a>
+      </div>
+    </div>
+  </section>
+<div class="c-flutuante" data-flutuante>
+  <a class="c-botao c-botao--primario" href="#agendar" data-cta="agendar">
+    Agendar horário <span class="seta" aria-hidden="true">→</span>
+  </a>
+</div>
+<script type="module" src="/assets/js/main.js"></script>
+<script type="module" src="/assets/efeito/hero-efeito.js"></script>
+</body>
+</html>

@@ -1,0 +1,123 @@
+/* ==========================================================================
+   tokens.css — camada única de decisões visuais
+   Fonte de verdade: specs/design.md. Nenhum valor cru fora deste arquivo.
+   ========================================================================== */
+
+:root {
+  /* ---------- Cor: paleta principal (design.md §2) ---------- */
+  --c-carvao:  #141311;   /* fundo escuro padrão */
+  --c-piche:   #0B0A09;   /* fundo mais profundo: galeria, TV, footer */
+  --c-osso:    #F2EFE9;   /* fundo claro padrão */
+  --c-nevoa:   #E2DFD7;   /* fundo claro secundário */
+  --c-platina: #C9CED6;   /* metálico frio: filetes, molduras, ícones */
+  /* Cores da identidade, definidas pelo cliente em 2026-08-22.
+     Pretas + estas três; ver memoria.md. */
+  --c-limao:    #c8e739;
+  --c-rosa:     #f82172;   /* ACENTO DE AÇÃO — herdou o papel do antigo Gelo */
+  --c-vermelho: #ed2c24;
+  /* Gelo #7FE7FF foi aposentado em 2026-08-22 junto com a paleta fria como
+     identidade. Não voltar a introduzi-lo: a cor de ação agora é o Rosa. */
+
+  /* ---------- Cor: apoio ---------- */
+  --c-grafite: #2A2825;
+  --c-fumaca:  #6E6A62;   /* texto de apoio no claro  — 4.7:1 sobre Osso */
+  --c-cinza:   #A8A399;   /* texto de apoio no escuro — 7.5:1 sobre Carvão */
+  --c-linha-clara:  rgba(20, 19, 17, .12);
+  --c-linha-escura: rgba(242, 239, 233, .14);
+  --c-erro:    #E4573D;
+
+  /* ---------- Papéis semânticos (trocados por .t-escuro) ---------- */
+  --fundo:        var(--c-osso);
+  --texto:        var(--c-carvao);
+  --texto-apoio:  var(--c-fumaca);
+  --linha:        var(--c-linha-clara);
+  --etiqueta:     var(--c-fumaca);   /* Platina não passa em texto sobre claro */
+  --btn-fundo:    var(--c-carvao);
+  --btn-texto:    var(--c-osso);
+  --superficie:   var(--c-nevoa);
+  /* Anel de foco. No CLARO ele NÃO é Rosa: medido, Rosa sobre Névoa dá
+     2.89:1 e reprova o mínimo de 3:1 da WCAG 1.4.11 (Rosa sobre Osso passa
+     raspando, 3.36:1, mas o anel precisa valer nas duas superfícies claras).
+     Carvão dá 15.5:1 e é a mesma cor do botão primário no claro. */
+  --foco:         var(--c-carvao);
+
+  /* ---------- Tipografia ---------- */
+  --f-display: "Archivo", "Helvetica Neue", Arial, sans-serif;
+  --f-serif:   "Instrument Serif", Georgia, "Times New Roman", serif;
+
+  --t-display: clamp(3.25rem, 11vw, 8.5rem);
+  --t-h1:      clamp(2.5rem, 7vw, 5.5rem);
+  --t-h2:      clamp(2rem, 5vw, 3.75rem);
+  --t-h3:      clamp(1.375rem, 2.5vw, 2rem);
+  --t-lead:    clamp(1.0625rem, 1.6vw, 1.375rem);
+  --t-body:    1rem;
+  --t-small:   .875rem;
+  --t-label:   .75rem;    /* 12px no mobile; cai para 11px em ≥768px */
+  --t-btn:     .8125rem;
+
+  --ls-display: -.035em;
+  --ls-h1:      -.03em;
+  --ls-h2:      -.02em;
+  --ls-h3:      -.01em;
+  --ls-label:   .12em;
+  --ls-btn:     .06em;
+
+  --lh-display: .86;
+  --lh-h1:      .92;
+  --lh-h2:      1;
+  --lh-h3:      1.15;
+  --lh-corpo:   1.6;
+
+  --medida: 68ch;   /* linha de leitura */
+
+  /* ---------- Espaçamento: escala de 8px ---------- */
+  --sp-1: 4px;   --sp-2: 8px;   --sp-3: 12px;  --sp-4: 16px;
+  --sp-5: 24px;  --sp-6: 32px;  --sp-7: 48px;  --sp-8: 64px;
+  --sp-9: 96px;  --sp-10: 128px; --sp-11: 160px; --sp-12: 200px;
+
+  --respiro-secao: clamp(96px, 12vw, 200px);
+
+  /* ---------- Raio ---------- */
+  --r-xs: 4px;  --r-sm: 8px;  --r-md: 16px;
+  --r-lg: 28px; --r-xl: 48px; --r-pill: 999px;
+
+  /* ---------- Grid e container ---------- */
+  --largura-max: 1360px;
+  --margem: 20px;         /* cresce nos breakpoints, layout.css */
+  --colunas: 4;
+  --vao: var(--sp-5);
+
+  /* ---------- Movimento (design.md §11) ---------- */
+  --e-entrada: cubic-bezier(.22, 1, .36, 1);
+  --e-saida:   cubic-bezier(.4, 0, 1, 1);
+  --d-micro:   160ms;
+  --d-elemento: 320ms;
+  --d-secao:   600ms;
+
+  /* ---------- Sombra: a única permitida ---------- */
+  --sombra-overlay: 0 24px 60px rgba(11, 10, 9, .28);
+
+  --altura-header: 64px;
+}
+
+@media (min-width: 768px) {
+  :root {
+    --t-label: .6875rem;   /* 11px volta a partir do tablet */
+    --altura-header: 76px;
+  }
+}
+
+/* ---------- Inversão de papéis nas seções escuras ---------- */
+.t-escuro {
+  --fundo:       var(--c-carvao);
+  --texto:       var(--c-osso);
+  --texto-apoio: var(--c-cinza);
+  --linha:       var(--c-linha-escura);
+  --etiqueta:    var(--c-platina);
+  --btn-fundo:   var(--c-rosa);
+  --btn-texto:   var(--c-piche);
+  --superficie:  var(--c-grafite);
+  --foco:        var(--c-rosa);   /* 5.1:1 sobre Piche — passa em AA */
+}
+
+.t-escuro.t-profundo { --fundo: var(--c-piche); }

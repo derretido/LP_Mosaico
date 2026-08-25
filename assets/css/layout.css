@@ -1,0 +1,90 @@
+/* ==========================================================================
+   layout.css — container, grid de 12 colunas, ritmo vertical, sangrias
+   Faixas conforme specs/site.md §11.
+   ========================================================================== */
+
+.l-container {
+  width: 100%;
+  max-width: calc(var(--largura-max) + var(--margem) * 2);
+  margin-inline: auto;
+  padding-inline: var(--margem);
+}
+
+.l-grid {
+  display: grid;
+  grid-template-columns: repeat(var(--colunas), minmax(0, 1fr));
+  gap: var(--vao);
+}
+
+/* ---------- Faixas de responsividade ---------- */
+@media (min-width: 480px)  { :root { --margem: 24px; } }
+@media (min-width: 768px)  { :root { --margem: 40px; --colunas: 8;  --vao: var(--sp-6); } }
+@media (min-width: 1024px) { :root { --margem: 56px; --colunas: 12; } }
+@media (min-width: 1280px) { :root { --margem: 64px; } }
+
+/* ---------- Seção: ritmo vertical e troca de fundo ---------- */
+.s {
+  position: relative;
+  padding-block: var(--respiro-secao);
+  background: var(--fundo);
+  color: var(--texto);
+}
+.s--curta  { padding-block: clamp(64px, 8vw, 120px); }
+.s--sem-topo { padding-block-start: 0; }
+
+/* ---------- Sangria: mídia atravessa o container, texto nunca ---------- */
+.l-sangria {
+  width: 100vw;
+  margin-inline: calc(50% - 50vw);
+}
+
+/* ---------- Fluxo vertical padronizado (design.md §4) ---------- */
+.l-fluxo > * + *          { margin-block-start: var(--sp-5); }
+.l-fluxo > .etiqueta + *  { margin-block-start: var(--sp-4); }
+.l-fluxo > * + .c-botao,
+.l-fluxo > * + .l-botoes  { margin-block-start: var(--sp-6); }
+
+.l-botoes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--sp-4);
+  align-items: center;
+}
+
+/* ---------- Cabeçalho de seção: idêntico em toda a página ---------- */
+.l-cabecalho { max-width: 46ch; }
+.l-cabecalho--centro { margin-inline: auto; text-align: center; }
+.l-cabecalho--centro .lead { margin-inline: auto; }
+
+/* ---------- Duas colunas assimétricas (7/5) com inversão de lado ---------- */
+.l-dupla { display: grid; gap: var(--sp-7); }
+@media (min-width: 768px) {
+  .l-dupla { grid-template-columns: 1fr 1fr; gap: var(--sp-6); align-items: center; }
+}
+@media (min-width: 1024px) {
+  .l-dupla { grid-template-columns: 7fr 5fr; gap: var(--sp-9); }
+  .l-dupla--invertida { grid-template-columns: 5fr 7fr; }
+  .l-dupla--invertida > :first-child { order: 2; }
+}
+
+/* ---------- Grade de cards: 1 → 2 → 3 ---------- */
+.l-cards {
+  display: grid;
+  gap: var(--sp-5);
+  grid-template-columns: 1fr;
+}
+@media (min-width: 640px)  { .l-cards { grid-template-columns: repeat(2, 1fr); gap: var(--sp-6); } }
+@media (min-width: 1024px) { .l-cards { grid-template-columns: repeat(3, 1fr); } }
+
+/* ---------- Malha de ladrilhos: o motivo da marca ---------- */
+.l-malha {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background-image:
+    linear-gradient(to right,  var(--linha) 1px, transparent 1px),
+    linear-gradient(to bottom, var(--linha) 1px, transparent 1px);
+  background-size: 88px 88px;
+  mask-image: radial-gradient(ellipse 80% 60% at 50% 0%, #000 20%, transparent 78%);
+  opacity: .8;
+}

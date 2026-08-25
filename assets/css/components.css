@@ -1,0 +1,1216 @@
+/* ==========================================================================
+   components.css — os 15 componentes. Nenhuma seção inventa componente novo.
+   ========================================================================== */
+
+/* ==== 1. Header ========================================================== */
+.c-header {
+  position: fixed;
+  inset-block-start: 0;
+  inset-inline: 0;
+  z-index: 100;
+  height: var(--altura-header);
+  display: flex;
+  align-items: center;
+  transition: height var(--d-elemento) var(--e-entrada),
+              background-color var(--d-elemento) var(--e-entrada),
+              border-color var(--d-elemento) var(--e-entrada);
+  border-block-end: 1px solid transparent;
+}
+.c-header > .l-container {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--sp-5);
+}
+.c-header:not(.is-rolado) { color: var(--c-osso); }
+.c-header:not(.is-rolado) .c-marca span { color: var(--c-platina); }
+.c-header:not(.is-rolado) .c-nav a { color: rgba(242, 239, 233, .72); }
+.c-header:not(.is-rolado) .c-nav a:hover,
+.c-header:not(.is-rolado) .c-nav a[aria-current="true"] { color: var(--c-osso); }
+.c-header:not(.is-rolado) .c-hamburguer { border-color: var(--c-linha-escura); }
+
+.c-header.is-rolado {
+  background: color-mix(in srgb, var(--c-osso) 82%, transparent);
+  -webkit-backdrop-filter: blur(14px);
+  backdrop-filter: blur(14px);
+  border-block-end-color: var(--c-linha-clara);
+}
+
+.c-marca {
+  flex: none;
+  display: inline-flex;
+  flex-direction: column;
+  line-height: .92;
+  font-weight: 800;
+  letter-spacing: -.02em;
+  text-transform: uppercase;
+  font-size: 1.0625rem;
+}
+.c-marca b { font-weight: 800; }
+.c-marca span {
+  white-space: nowrap;
+  font-size: .5rem;
+  font-weight: 600;
+  letter-spacing: .24em;
+  color: var(--c-fumaca);
+}
+
+/* ==== 2. Navegação por âncoras ========================================== */
+.c-nav { display: none; }
+@media (min-width: 1024px) {
+  .c-nav { display: flex; align-items: center; gap: var(--sp-5); }
+}
+.c-nav a {
+  position: relative;
+  font-size: var(--t-label);
+  font-weight: 600;
+  letter-spacing: var(--ls-label);
+  text-transform: uppercase;
+  padding-block: var(--sp-2);
+  color: var(--c-fumaca);
+  transition: color var(--d-micro) var(--e-entrada);
+}
+.c-nav a::after {
+  content: "";
+  position: absolute;
+  inset-block-end: 0;
+  inset-inline-start: 0;
+  width: 100%;
+  height: 1px;
+  background: currentColor;
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform var(--d-micro) var(--e-entrada);
+}
+.c-nav a:hover { color: var(--c-carvao); }
+.c-nav a:hover::after { transform: scaleX(1); }
+.c-nav a[aria-current="true"] { color: var(--c-carvao); }
+.c-nav a[aria-current="true"]::after { transform: scaleX(1); }
+
+/* CTA do header: some no mobile (lá quem manda é o CTA flutuante) e, no
+   desktop, entra só depois que o hero sai da tela (site.md §8). */
+.c-header .c-botao--cta-header { display: none; }
+
+@media (min-width: 1024px) {
+.c-header .c-botao--cta-header {
+  display: inline-flex;
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(-6px);
+  transition: opacity var(--d-elemento) var(--e-entrada),
+              transform var(--d-elemento) var(--e-entrada),
+              visibility var(--d-elemento);
+}
+.c-header.is-rolado .c-botao--cta-header {
+  opacity: 1;
+  visibility: visible;
+  transform: none;
+}
+}
+
+/* ==== 3. Painel de menu mobile ========================================== */
+.c-hamburguer {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  border-radius: var(--r-sm);
+  border: 1px solid var(--c-linha-clara);
+}
+@media (min-width: 1024px) { .c-hamburguer { display: none; } }
+.c-hamburguer span {
+  position: relative;
+  width: 18px;
+  height: 1.5px;
+  background: currentColor;
+  transition: background-color var(--d-micro) var(--e-entrada);
+}
+.c-hamburguer span::before,
+.c-hamburguer span::after {
+  content: "";
+  position: absolute;
+  inset-inline: 0;
+  height: 1.5px;
+  background: currentColor;
+  transition: transform var(--d-elemento) var(--e-entrada);
+}
+.c-hamburguer span::before { inset-block-start: -6px; }
+.c-hamburguer span::after  { inset-block-start: 6px; }
+.c-hamburguer[aria-expanded="true"] span { background: transparent; }
+.c-hamburguer[aria-expanded="true"] span::before { transform: translateY(6px) rotate(45deg); }
+.c-hamburguer[aria-expanded="true"] span::after  { transform: translateY(-6px) rotate(-45deg); }
+
+.c-painel {
+  position: fixed;
+  inset: 0;
+  z-index: 90;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: var(--sp-6);
+  padding: var(--sp-9) var(--margem) var(--sp-7);
+  background: var(--c-carvao);
+  color: var(--c-osso);
+  box-shadow: var(--sombra-overlay);
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(-2%);
+  transition: opacity var(--d-elemento) var(--e-entrada),
+              transform var(--d-elemento) var(--e-entrada),
+              visibility var(--d-elemento);
+}
+.c-painel.is-aberto { opacity: 1; visibility: visible; transform: none; }
+.c-painel a.c-painel__link {
+  display: block;
+  font-size: clamp(1.75rem, 8vw, 2.75rem);
+  font-weight: 800;
+  letter-spacing: -.02em;
+  line-height: 1.1;
+  text-transform: uppercase;
+  padding-block: var(--sp-2);
+  min-height: 44px;
+}
+.c-painel__rodape {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--sp-4);
+  padding-block-start: var(--sp-5);
+  border-block-start: 1px solid var(--c-linha-escura);
+}
+body.is-travado { overflow: hidden; }
+
+/* ==== 4. Botões ========================================================== */
+.c-botao {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--sp-2);
+  min-height: 48px;
+  padding-inline: var(--sp-6);
+  border-radius: var(--r-pill);
+  font-size: var(--t-btn);
+  font-weight: 600;
+  letter-spacing: var(--ls-btn);
+  text-transform: uppercase;
+  text-align: center;
+  white-space: nowrap;
+  transition: background-color var(--d-micro) var(--e-entrada),
+              color var(--d-micro) var(--e-entrada),
+              border-color var(--d-micro) var(--e-entrada),
+              transform var(--d-micro) var(--e-saida);
+}
+@media (min-width: 1024px) { .c-botao { min-height: 52px; padding-inline: 28px; } }
+.c-botao:active { transform: scale(.98); }
+.c-botao .seta { transition: transform var(--d-micro) var(--e-entrada); }
+.c-botao:hover .seta { transform: translateX(4px); }
+
+.c-botao--primario {
+  background: var(--btn-fundo);
+  color: var(--btn-texto);
+}
+.c-botao--primario:hover { background: color-mix(in srgb, var(--btn-fundo) 94%, #000); }
+
+.c-botao--secundario {
+  background: transparent;
+  color: var(--texto);
+  border: 1px solid currentColor;
+}
+.c-botao--secundario:hover { background: var(--texto); color: var(--fundo); }
+
+.c-botao--terciario {
+  min-height: 44px;
+  padding-inline: 0;
+  border-radius: 0;
+  background: none;
+  color: var(--texto);
+  position: relative;
+}
+.c-botao--terciario::after {
+  content: "";
+  position: absolute;
+  inset-block-end: 10px;
+  inset-inline-start: 0;
+  width: 100%;
+  height: 1px;
+  background: currentColor;
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform var(--d-elemento) var(--e-entrada);
+}
+.c-botao--terciario:hover::after { transform: scaleX(1); }
+
+.c-botao--icone {
+  width: 44px;
+  height: 44px;
+  min-height: 44px;
+  padding: 0;
+  border-radius: var(--r-sm);
+  border: 1px solid var(--linha);
+  color: var(--texto);
+}
+.c-botao--icone:hover { border-color: var(--c-platina); }
+.c-botao--icone:disabled { opacity: .35; cursor: not-allowed; }
+
+.c-botao[aria-disabled="true"] { opacity: .5; cursor: not-allowed; }
+
+/* ==== 5. Moldura de mídia (usada por todos os cards) ==================== */
+.c-midia {
+  position: relative;
+  overflow: hidden;
+  border-radius: var(--r-lg);
+  background: var(--superficie);
+  isolation: isolate;
+}
+.c-midia > img { width: 100%; height: 100%; object-fit: cover; }
+.c-midia--4x5  { aspect-ratio: 4 / 5; }
+.c-midia--16x9 { aspect-ratio: 16 / 9; }
+.c-midia--3x2  { aspect-ratio: 3 / 2; }
+.c-midia--zoom > img { transition: transform var(--d-secao) var(--e-entrada); }
+@media (hover: hover) {
+  .c-midia--zoom:hover > img { transform: scale(1.03); }
+}
+
+/* ==== 6. Canto entalhado: a assinatura de forma ========================= */
+.c-entalhe {
+  --entalhe: 40px;
+  border-radius: var(--r-md);
+}
+@supports (clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%)) {
+  .c-entalhe {
+    border-end-end-radius: 0;
+    clip-path: polygon(
+      0 0, 100% 0,
+      100% calc(100% - var(--entalhe)),
+      calc(100% - var(--entalhe)) 100%,
+      0 100%
+    );
+  }
+}
+
+/* ==== 7. Card de serviço =============================================== */
+.c-servico {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-3);
+  padding: var(--sp-5);
+  background: var(--superficie);
+  border: 1px solid var(--linha);
+  transition: transform var(--d-elemento) var(--e-entrada),
+              border-color var(--d-elemento) var(--e-entrada);
+}
+@media (min-width: 1024px) { .c-servico { padding: var(--sp-6); } }
+@media (hover: hover) {
+  .c-servico:hover { transform: translateY(-4px); border-color: var(--c-platina); }
+}
+.c-servico__topo {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--sp-4);
+}
+.c-servico__valor {
+  font-size: 1.125rem;
+  font-weight: 700;
+  letter-spacing: -.01em;
+  text-align: right;
+  white-space: nowrap;
+}
+.c-servico p { color: var(--texto-apoio); font-size: var(--t-small); }
+.c-servico__duracao { margin-block-start: auto; padding-block-start: var(--sp-4); }
+
+/* ==== 8. Card de portfólio ============================================= */
+.c-obra {
+  --entalhe: 36px;
+  display: flex;
+  flex-direction: column;
+  background: var(--superficie);
+  border: 1px solid var(--linha);
+  overflow: hidden;
+}
+.c-obra .c-midia { border-radius: 0; }
+.c-obra__aba {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--sp-4);
+  padding: var(--sp-4) var(--sp-5);
+  padding-inline-end: calc(var(--entalhe) + var(--sp-3));
+}
+
+/* ==== 9. Card de curso ================================================= */
+.c-curso {
+  padding: var(--sp-5);
+  border-radius: var(--r-lg);
+  background: var(--superficie);
+  border: 1px solid var(--linha);
+}
+@media (min-width: 1024px) { .c-curso { padding: var(--sp-7); } }
+.c-curso__lista { display: grid; gap: var(--sp-3); margin-block: var(--sp-5); }
+.c-curso__lista li {
+  display: grid;
+  grid-template-columns: 10px 1fr;
+  gap: var(--sp-3);
+  align-items: start;
+  font-size: var(--t-small);
+  color: var(--texto-apoio);
+  max-width: none;
+}
+.c-curso__lista li::before {
+  content: "";
+  width: 10px;
+  height: 10px;
+  margin-block-start: .45em;
+  background: var(--c-rosa);   /* ladrilho no lugar da bolinha */
+}
+.c-curso__dados {
+  display: grid;
+  gap: var(--sp-4);
+  padding-block: var(--sp-5);
+  border-block: 1px solid var(--linha);
+  margin-block-end: var(--sp-5);
+}
+@media (min-width: 480px) { .c-curso__dados { grid-template-columns: repeat(3, 1fr); } }
+.c-curso__dado dt { font-size: var(--t-label); letter-spacing: var(--ls-label); text-transform: uppercase; color: var(--etiqueta); }
+.c-curso__dado dd { font-size: 1.0625rem; font-weight: 700; margin-block-start: var(--sp-1); }
+.c-curso.is-esgotado { opacity: .72; }
+.c-curso.is-esgotado .c-curso__lista li::before { background: var(--c-fumaca); }
+
+/* ==== 10. Card de vídeo (fachada) ====================================== */
+.c-video { display: flex; flex-direction: column; gap: var(--sp-4); }
+.c-video__fachada {
+  position: relative;
+  display: block;
+  width: 100%;
+  padding: 0;
+  border-radius: var(--r-lg);
+  overflow: hidden;
+  background: var(--superficie);
+  aspect-ratio: 16 / 9;
+  cursor: pointer;
+}
+.c-video__fachada img { width: 100%; height: 100%; object-fit: cover; }
+.c-video__fachada::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, transparent 40%, rgba(11,10,9,.55));
+  z-index: 1;
+}
+.c-video__play {
+  position: absolute;
+  inset-block-start: 50%;
+  inset-inline-start: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 2;
+  display: grid;
+  place-items: center;
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background: var(--c-rosa);
+  color: var(--c-piche);
+  transition: transform var(--d-elemento) var(--e-entrada);
+}
+@media (hover: hover) {
+  .c-video__fachada:hover .c-video__play { transform: translate(-50%, -50%) scale(1.06); }
+}
+.c-video__duracao {
+  position: absolute;
+  inset-block-end: var(--sp-3);
+  inset-inline-end: var(--sp-3);
+  z-index: 2;
+  padding: 4px var(--sp-2);
+  border-radius: var(--r-xs);
+  background: rgba(11,10,9,.72);
+  color: var(--c-osso);
+  font-size: var(--t-label);
+  letter-spacing: var(--ls-label);
+}
+
+/* ==== 11. Comparador antes/depois ====================================== */
+.c-comparador {
+  position: relative;
+  overflow: hidden;
+  border-radius: var(--r-lg);
+  aspect-ratio: 4 / 5;
+  background: var(--superficie);
+  touch-action: pan-y;
+}
+.c-comparador img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.c-comparador__depois {
+  clip-path: inset(0 0 0 var(--posicao, 50%));
+}
+.c-comparador__linha {
+  position: absolute;
+  inset-block: 0;
+  inset-inline-start: var(--posicao, 50%);
+  width: 2px;
+  background: var(--c-osso);
+  transform: translateX(-1px);
+  pointer-events: none;
+}
+.c-comparador__alca {
+  position: absolute;
+  inset-block-start: 50%;
+  inset-inline-start: 50%;
+  transform: translate(-50%, -50%);
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: var(--c-osso);
+  color: var(--c-piche);
+  display: grid;
+  place-items: center;
+  box-shadow: var(--sombra-overlay);
+}
+.c-comparador__campo {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  opacity: 0;
+  cursor: ew-resize;
+}
+.c-comparador__campo:focus-visible ~ .c-comparador__linha .c-comparador__alca {
+  outline: 2px solid var(--foco);
+  outline-offset: 2px;
+}
+.c-comparador__tag {
+  position: absolute;
+  inset-block-start: var(--sp-4);
+  z-index: 2;
+  padding: 4px var(--sp-3);
+  border-radius: var(--r-xs);
+  background: rgba(11,10,9,.72);
+  color: var(--c-osso);
+  font-size: var(--t-label);
+  letter-spacing: var(--ls-label);
+  text-transform: uppercase;
+}
+.c-comparador__tag--antes  { inset-inline-start: var(--sp-4); }
+.c-comparador__tag--depois { inset-inline-end: var(--sp-4); }
+
+/* ==== 12. Trilho horizontal ============================================ */
+.c-trilho { position: relative; }
+.c-trilho__pista {
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  scrollbar-width: none;
+  padding-inline: var(--margem);
+  padding-block-end: var(--sp-2);
+  overscroll-behavior-x: contain;
+}
+.c-trilho__pista::-webkit-scrollbar { display: none; }
+.c-trilho__lista {
+  display: flex;
+  gap: var(--sp-5);
+}
+.c-trilho__lista > * {
+  flex: 0 0 78%;
+  scroll-snap-align: center;
+}
+@media (min-width: 640px)  { .c-trilho__lista > * { flex-basis: 46%; } }
+@media (min-width: 1024px) {
+  .c-trilho__pista { scroll-snap-type: none; }
+  .c-trilho__lista { gap: var(--sp-6); }
+  .c-trilho__lista > * { flex-basis: 30%; scroll-snap-align: start; }
+}
+.c-trilho__pista.is-arrastando { cursor: grabbing; scroll-snap-type: none; }
+.c-trilho__pista.is-arrastando * { pointer-events: none; }
+
+.c-trilho__base {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-5);
+  margin-block-start: var(--sp-6);
+}
+.c-trilho__progresso {
+  position: relative;
+  flex: 1;
+  height: 1px;
+  background: var(--linha);
+}
+.c-trilho__progresso span {
+  position: absolute;
+  inset-block: 0;
+  inset-inline-start: 0;
+  width: var(--extensao, 30%);
+  background: var(--c-platina);
+  transform: translateX(var(--deslocamento, 0));
+  transition: transform var(--d-micro) linear;
+}
+.c-trilho__controles { display: flex; gap: var(--sp-2); }
+
+/* ==== 13. Acordeão ===================================================== */
+.c-acordeao { border-block-start: 1px solid var(--linha); }
+.c-acordeao__item { border-block-end: 1px solid var(--linha); }
+.c-acordeao__gatilho {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--sp-5);
+  width: 100%;
+  min-height: 64px;
+  padding-block: var(--sp-4);
+  text-align: left;
+  font-size: 1.0625rem;
+  font-weight: 700;
+  letter-spacing: -.01em;
+  text-transform: uppercase;
+}
+.c-acordeao__sinal {
+  position: relative;
+  flex: none;
+  width: 16px;
+  height: 16px;
+}
+.c-acordeao__sinal::before,
+.c-acordeao__sinal::after {
+  content: "";
+  position: absolute;
+  inset-block-start: 50%;
+  inset-inline-start: 0;
+  width: 16px;
+  height: 1.5px;
+  background: currentColor;
+  transition: transform var(--d-elemento) var(--e-entrada);
+}
+.c-acordeao__sinal::after { transform: rotate(90deg); }
+.c-acordeao__gatilho[aria-expanded="true"] .c-acordeao__sinal::after { transform: rotate(0); }
+.c-acordeao__corpo {
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows var(--d-elemento) var(--e-entrada);
+}
+.c-acordeao__corpo > div { overflow: hidden; }
+.c-acordeao__item.is-aberto .c-acordeao__corpo { grid-template-rows: 1fr; }
+.c-acordeao__corpo p {
+  padding-block-end: var(--sp-5);
+  color: var(--texto-apoio);
+}
+
+/* ==== 14. Bloco de horários ============================================ */
+.c-horarios { display: grid; gap: var(--sp-2); }
+.c-horarios div {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--sp-4);
+  padding-block: var(--sp-2);
+  border-block-end: 1px solid var(--linha);
+}
+.c-horarios dt { font-size: var(--t-small); color: var(--texto-apoio); }
+.c-horarios dd { font-size: var(--t-small); font-weight: 600; }
+.c-horarios div.is-hoje dd { color: var(--texto); }
+
+/* ==== 15. Cartão de encerramento (footer) ============================== */
+.c-fecho {
+  border-radius: var(--r-xl);
+  background: var(--fundo);
+  color: var(--texto);
+  padding: var(--sp-7) var(--sp-5);
+  position: relative;
+  overflow: hidden;
+}
+@media (min-width: 768px)  { .c-fecho { padding: var(--sp-9) var(--sp-8); } }
+.c-fecho__grade {
+  display: grid;
+  gap: var(--sp-7);
+  margin-block-start: var(--sp-9);
+}
+@media (min-width: 640px) { .c-fecho__grade { grid-template-columns: repeat(3, 1fr); } }
+.c-fecho__coluna h3 {
+  font-size: var(--t-label);
+  letter-spacing: var(--ls-label);
+  color: var(--c-platina);
+  margin-block-end: var(--sp-4);
+}
+.c-fecho__coluna li + li { margin-block-start: var(--sp-2); }
+.c-fecho__coluna a {
+  /* inline-flex com centro vertical, e não inline-block: só declarar altura
+     deixaria o texto colado no topo de uma caixa de 44px. O mínimo de toque
+     de 44x44 é exigência de site.md §11 e §12; estava em 32px. */
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  font-weight: 600;
+  letter-spacing: -.01em;
+  text-transform: uppercase;
+}
+.c-fecho__coluna a:hover { color: var(--c-rosa); }
+.c-fecho__legal {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--sp-4);
+  justify-content: space-between;
+  margin-block-start: var(--sp-8);
+  padding-block-start: var(--sp-5);
+  border-block-start: 1px solid var(--c-linha-escura);
+  font-size: var(--t-small);
+  color: var(--c-cinza);
+}
+
+/* ==== CTA flutuante do mobile ========================================== */
+.c-flutuante {
+  position: fixed;
+  inset-block-end: var(--sp-4);
+  inset-inline: var(--margem);
+  z-index: 80;
+  display: flex;
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(120%);
+  transition: opacity var(--d-elemento) var(--e-entrada),
+              transform var(--d-elemento) var(--e-entrada),
+              visibility var(--d-elemento);
+}
+.c-flutuante .c-botao { flex: 1; box-shadow: var(--sombra-overlay); }
+.c-flutuante.is-visivel { opacity: 1; visibility: visible; transform: none; }
+@media (min-width: 1024px) { .c-flutuante { display: none; } }
+
+/* ==== Citação (prova social) =========================================== */
+.c-citacao {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-5);
+  padding: var(--sp-5);
+  border-radius: var(--r-md);
+  background: var(--superficie);
+  border: 1px solid var(--linha);
+}
+.c-citacao blockquote {
+  font-family: var(--f-serif);
+  font-size: clamp(1.125rem, 2vw, 1.5rem);
+  line-height: 1.35;
+  letter-spacing: 0;
+}
+.c-citacao figcaption {
+  margin-block-start: auto;
+  font-size: var(--t-label);
+  letter-spacing: var(--ls-label);
+  text-transform: uppercase;
+  color: var(--etiqueta);
+}
+
+/* ==== Reveal por rolagem =============================================== */
+.revelar {
+  opacity: 0;
+  transform: translateY(24px);
+  transition: opacity var(--d-secao) var(--e-entrada),
+              transform var(--d-secao) var(--e-entrada);
+  transition-delay: var(--atraso, 0ms);
+}
+.revelar.is-visivel { opacity: 1; transform: none; }
+
+/* ==== Escrita palavra a palavra ========================================
+   Cada palavra ganha uma máscara de recorte e sobe de baixo, com defasagem
+   crescente — a frase se escreve em cascata em vez de aparecer inteira.
+   O par de padding/margin abre folga para acentos de caixa alta (É, Ã) não
+   serem cortados pelo recorte.
+   ====================================================================== */
+.escrita__p {
+  display: inline-block;
+  overflow: hidden;
+  vertical-align: bottom;
+  padding-block: .14em;
+  margin-block: -.14em;
+}
+.escrita__i {
+  display: inline-block;
+  transform: translateY(115%);
+  opacity: 0;
+  transition:
+    transform var(--d-secao) var(--e-entrada),
+    opacity calc(var(--d-secao) / 2) linear;
+  transition-delay: calc(var(--i) * var(--defasagem, 48ms));
+}
+.is-escrito .escrita__i {
+  transform: none;
+  opacity: 1;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .escrita__i { transform: none; opacity: 1; transition: none; }
+}
+
+/* ==== Card de serviço, variante escura com fundo animado ================
+   Cartão escuro sobre a seção clara, com uma composição de manchas girando
+   devagar por baixo do texto. Roda em `transform`, que o compositor resolve,
+   e o `clip-path` do entalhe recorta a camada junto — a assinatura de forma
+   da marca continua valendo.
+   Sem WebGL de propósito: a página já mantém seis contextos, e cinco cards
+   com shader próprio arriscariam derrubar o da hero.
+   ====================================================================== */
+.c-servico--escuro {
+  position: relative;
+  isolation: isolate;
+  /* O clip-path do entalhe recorta a pintura, mas não impede a camada de
+     -60% de contar como transbordo rolável: sem isto, a página ganha rolagem
+     horizontal. */
+  overflow: hidden;
+  background: var(--c-piche);
+  border-color: var(--c-linha-escura);
+  color: var(--c-osso);
+  text-decoration: none;
+  /* o card é uma ilha escura dentro de uma seção clara: os papéis de cor
+     precisam ser invertidos aqui dentro */
+  --texto-apoio: var(--c-cinza);
+  --etiqueta: var(--c-platina);
+}
+.c-servico--escuro > * {
+  position: relative;
+  z-index: 1;
+}
+.c-servico--escuro::before {
+  content: "";
+  position: absolute;
+  inset: -60%;
+  z-index: 0;
+  /* Uma mancha por cor da identidade, girando devagar. Antes eram dois Gelos
+     e uma Platina escritos em rgba DECIMAL — foi por isso que a varredura de
+     22/08 não os pegou: ela procurava por `gelo` e por `7FE7FF`. Ao trocar
+     cor de paleta, procurar também pelos valores em decimal.
+     Alfas conferidos com o texto por cima. O pior caso não é uma mancha
+     sozinha e sim as TRÊS empilhadas no pico: compondo sobre Piche dá
+     rgb(123,57,41), e Osso sobre isso ainda rende 7.4:1 — folga confortável
+     sobre o mínimo de 4.5:1. Subir estes alfas come essa folga. */
+  background:
+    radial-gradient(closest-side, rgba(200, 231,  57, .26), transparent),
+    radial-gradient(closest-side, rgba(248,  33, 114, .22), transparent),
+    radial-gradient(closest-side, rgba(237,  44,  36, .16), transparent);
+  background-repeat: no-repeat;
+  background-position: 24% 26%, 74% 64%, 50% 92%;
+  background-size: 58% 58%, 52% 52%, 66% 66%;
+  animation: c-servico-fluxo var(--fluxo-dur, 28s) linear infinite;
+  animation-delay: var(--fluxo-atraso, 0s);
+}
+@keyframes c-servico-fluxo {
+  to { transform: rotate(1turn); }
+}
+
+/* Defasagem e ritmo diferentes por card, para a grade não pulsar em bloco. */
+.l-cards > li:nth-child(2) .c-servico--escuro { --fluxo-dur: 34s; --fluxo-atraso: -7s; }
+.l-cards > li:nth-child(3) .c-servico--escuro { --fluxo-dur: 24s; --fluxo-atraso: -14s; }
+.l-cards > li:nth-child(4) .c-servico--escuro { --fluxo-dur: 31s; --fluxo-atraso: -4s; }
+.l-cards > li:nth-child(5) .c-servico--escuro { --fluxo-dur: 26s; --fluxo-atraso: -19s; }
+
+@media (hover: hover) {
+  .c-servico--escuro:hover { border-color: var(--c-rosa); }
+}
+.c-servico--escuro:focus-visible {
+  outline: 2px solid var(--foco);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .c-servico--escuro::before { animation: none; }
+}
+
+/* ==== Galeria editorial do portfólio ====================================
+   Composição determinística. A <li> é a CÉLULA: ocupa um número fixo de
+   fileiras de 8px e o recuo vertical dela é PADDING, nunca margem — margem
+   num item de grid soma fora da área e o card invade a linha de baixo.
+   O card mora dentro da célula e preenche o que sobra do padding.
+   Paleta: preto e as três cores da identidade (limão, rosa, vermelho).
+   ====================================================================== */
+/* Grade 3x3 de nove peças iguais. Substituiu a galeria editorial assimétrica
+   em 2026-08-22, a pedido do cliente.
+
+   Aqui não há mais trilha de 8px nem classe de tamanho: como as três colunas
+   são iguais e a mídia é travada em 4:5, todo card sai com a mesma largura e
+   a mesma altura sozinho. Foi por isso que o `row-gap` pôde voltar a existir —
+   ele era zero justamente porque a altura vinha de contar fileiras de 8px. */
+.c-galeria {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--sp-5);
+  margin-block-start: var(--sp-7);
+}
+
+/* ---------- O card em L, com degrau no canto inferior esquerdo ----------
+   Duas camadas recortadas pela MESMA silhueta: a de fora pintada com a cor da
+   linha, a de dentro recuada 1px com o preto do card. O que sobra da de fora
+   é um contorno de 1px que acompanha o L inteiro, degrau incluído — `border`
+   não faria isso, porque o recorte cortaria a borda e as arestas do degrau
+   ficariam sem traço.
+   `border-radius` vale junto do recorte: a área pintada é a interseção dos
+   dois, então os cantos externos ficam redondos e só o degrau tem quina. */
+.c-obra--galeria {
+  /* Largura mínima da faixa da legenda. O degrau era 46% fixo, e 46% de um
+     card estreito (368px) deixa 199px de faixa para um texto que pede 212 —
+     a legenda vazava para a esquerda do degrau e o clip-path cortava. Era o
+     que fazia seis dos oito cards parecerem quebrados. Com o mínimo em
+     pixels, o card largo mantém os 46% e o estreito abre o degrau só o
+     tanto que a legenda precisa. O max() protege um card mais estreito que a
+     própria faixa: o degrau some e o card vira retângulo, sem sujeira. */
+  --banda-min: 260px;
+  --passo-x: max(0px, min(46%, calc(100% - var(--banda-min))));
+  --passo-y: 52px;
+  --silhueta: polygon(
+    0 0, 100% 0, 100% 100%,
+    var(--passo-x) 100%,
+    var(--passo-x) calc(100% - var(--passo-y)),
+    0 calc(100% - var(--passo-y))
+  );
+  height: 100%;
+  padding: 1px;                      /* a espessura do contorno */
+  /* Contorno em Osso. Com o corpo do card em preto — decisão do cliente em
+     2026-08-22 — é o CONTORNO que desenha a peça, não a diferença de fundo:
+     por isso ele é forte (.42) em vez do fio quase invisível de antes. Essa
+     é a condição para o card quase preto funcionar; rebaixar este alfa
+     devolve a galeria ao estado em que ela parecia desmontada. */
+  background: rgba(242, 239, 233, .42);
+  border-radius: var(--r-lg);
+  clip-path: var(--silhueta);
+  transition: background-color var(--d-elemento) var(--e-entrada);
+}
+.c-obra__corpo {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  /* Preto, mais escuro que o Piche da seção: o card vira um poço e quem o
+     recorta é o contorno branco acima. Substitui o Grafite que design.md §7
+     pede para card de portfólio — decisão do cliente em 2026-08-22, depois
+     de eu avisar que fundo quase igual ao da seção foi o que quebrou a
+     galeria antes. Só se sustenta junto do contorno forte e dos marcadores
+     na mesma cor; mexer num sem o outro traz o defeito de volta. */
+  background: #000;
+  border-radius: calc(var(--r-lg) - 1px);
+  clip-path: var(--silhueta);
+}
+
+.c-galeria__midia {
+  position: relative;
+  /* 4:5, a proporção que design.md §9 fixa para o portfólio. É daqui que sai
+     a uniformidade da grade: com a coluna igual e a proporção travada, os
+     nove cards têm a mesma altura sem ninguém declarar altura nenhuma.
+     Antes era `flex: 1`, que fazia a mídia herdar a altura do card. */
+  aspect-ratio: 4 / 5;
+  overflow: hidden;
+  /* Sempre a MESMA cor do corpo: com valor próprio, a emenda entre a foto e
+     a faixa da legenda aparece como degrau de cor. */
+  background: #000;
+}
+.c-galeria__img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+/* A secundária entra ampliada e assenta no hover: é o desencontro entre as
+   duas escalas que dá profundidade. */
+.c-galeria__img--secundaria {
+  transform: scale(1.08);
+  transition: transform 820ms var(--e-entrada);
+}
+/* A principal é varrida por uma diagonal, descobrindo a de trás. */
+.c-galeria__img--principal {
+  clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%);
+  transition: clip-path 760ms var(--e-entrada), transform 760ms var(--e-entrada);
+}
+
+/* A legenda mora na faixa à direita do degrau.
+   O recuo da esquerda é o PRÓPRIO degrau: assim o texto não pode começar
+   antes dele, qualquer que seja a legenda real que venha a substituir os
+   marcadores. Antes o recuo era fixo e a faixa é que tinha de adivinhar a
+   largura do texto — foi assim que a legenda passou a ser cortada pelo
+   clip-path quando a etiqueta cresce (ela é 12px no celular contra 11 no
+   desktop, então o celular era o pior caso, não o melhor). */
+.c-obra__aba {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: var(--sp-3);
+  height: var(--passo-y);
+  margin: 0;
+  padding-inline: calc(var(--passo-x) + var(--sp-5)) var(--sp-5);
+  font-size: var(--t-label);
+  letter-spacing: var(--ls-label);
+  font-weight: 600;
+}
+/* Legenda sem cor de acento: a hierarquia é só de contraste — nome em Osso,
+   ano em Cinza. A galeria ficou preto e branco de propósito, para a foto ser
+   a única coisa colorida da seção. */
+.c-obra__nome, .c-obra__ano {
+  /* Sem isto o texto quebra em duas linhas quando a faixa aperta, e o defeito
+     passa despercebido porque nada transborda visivelmente. Com nowrap, se um
+     dia a legenda não couber, ela transborda e o problema aparece. */
+  white-space: nowrap;
+}
+.c-obra__nome { color: var(--c-osso); }
+.c-obra__ano  { color: var(--c-cinza); }
+
+@media (hover: hover) {
+  .c-obra--galeria:hover { background: var(--c-osso); }
+  .c-obra--galeria:hover .c-galeria__img--principal {
+    clip-path: polygon(0 0, 100% 0, 100% -45%, 0 0);
+    transform: scale(1.03);
+  }
+  .c-obra--galeria:hover .c-galeria__img--secundaria { transform: scale(1); }
+}
+
+/* O parallax de rolagem saiu junto com a composição assimétrica. Ele existia
+   para dar vida a uma grade irregular, e dependia de AMPLITUDE DIFERENTE POR
+   COLUNA: com amplitude única a grade se move em bloco e o efeito some. Numa
+   grade uniforme não há como variar sem quebrar a uniformidade pedida, então
+   ele foi removido em vez de virar um movimento que não se percebe.
+   `assets/js/parallax.js` continua no projeto e ainda serve qualquer
+   [data-sobe] — hoje não há nenhum. */
+
+/* Os pontos de quebra saem de uma CONTA, não do costume: a legenda mede 178px
+   de largura natural e pede 24px de recuo de cada lado, então o card não pode
+   ter menos de ~226px sem espremer o texto — e espremer aqui não corta, faz a
+   etiqueta quebrar em duas linhas dentro de uma faixa de 52px, em silêncio.
+   Descontando margem lateral e vãos:
+     3 colunas precisam de ~806px de janela  -> ligadas em 1024px, com folga
+     2 colunas precisam de ~516px            -> ligadas em 560px, com folga
+   Em 768px, três colunas dariam 213px de card e a legenda quebraria; por isso
+   o tablet fica em duas, e não em três. */
+@media (max-width: 1023px) {
+  .c-galeria { grid-template-columns: repeat(2, 1fr); }
+}
+@media (max-width: 559px) {
+  .c-galeria { grid-template-columns: 1fr; }
+}
+/* A etiqueta é 12px abaixo de 768px contra 11 no desktop, então o celular é o
+   pior caso para a faixa, não o melhor. */
+@media (max-width: 767px) {
+  .c-obra--galeria { --banda-min: 250px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .c-galeria__img--principal,
+  .c-galeria__img--secundaria { transition: none; }
+}
+
+/* ==== Leque de cartas (galeria "Nas redes") =============================
+   Sete fotos verticais sobrepostas: a central reta, maior e na frente; as
+   laterais progressivamente giradas e mais baixas, formando um arco.
+
+   COMO O LEQUE É MONTADO. `assets/js/leque.js` escreve em cada carta apenas
+   três números sem unidade — `--i` (índice com sinal, negativo à esquerda),
+   `--d` (distância do centro) e `--arco` (a curva, que cresce com o quadrado
+   dessa distância) — mais o z-index. Toda a geometria em pixels e graus mora
+   aqui, nos "passos" abaixo. É por isso que o leque responde a media query
+   sem uma linha de JavaScript por faixa de tela.
+
+   POR QUE `translate`/`rotate`/`scale` SEPARADOS, e não `transform`. São
+   propriedades independentes: o leque escreve translate e rotate, o hover
+   escreve scale, e uma não apaga a outra. Com `transform` numa linha só, o
+   hover apagaria a rotação da carta e o leque desmontaria a cada passagem do
+   mouse — que é exatamente o risco apontado no pedido.
+   ====================================================================== */
+/* `--realce` registrada como número para poder ser TRANSICIONADA. Sem isto,
+   a transição teria de ficar em `scale` — e `scale` também é dirigida pela
+   rolagem, então ela arrastaria atrás do dedo em vez de acompanhar quadro a
+   quadro. Registrando a variável, o hover ganha suavidade e o leque continua
+   colado na rolagem. */
+@property --realce {
+  syntax: "<number>";
+  inherits: false;
+  initial-value: 1;
+}
+/* `--ab` também registrada, e não por capricho: ela guarda um `clamp()`, e um
+   `clamp()` aninhado dentro de `calc()` não resolve na multiplicação — o alfa
+   da sombra caía para zero e a sombra sumia. Registrada como número, o
+   navegador resolve o clamp antes da substituição e o calc recebe um número
+   comum. */
+@property --ab {
+  syntax: "<number>";
+  inherits: false;
+  initial-value: 1;
+}
+
+.c-leque {
+  position: relative;
+  /* Altura reservada: as cartas são absolutas e não empurram nada, então sem
+     isto a seção teria altura zero e o conteúdo abaixo saltaria. O valor é
+     medido, não chutado: carta (largura x 4/3) mais a subida do arco no
+     centro mais a folga que o giro de 15° pede nos cantos de cima. */
+  height: clamp(330px, 38vw, 500px);
+  margin-block-start: var(--sp-8);
+
+  /* O padrão de --abertura mora AQUI, no mesmo elemento em que o leque.js
+     escreve. Declarado na carta, ele venceria o valor herdado e o que o
+     JavaScript escreve nunca chegaria — declaração local ganha de herança.
+     O valor padrão é 1 (leque aberto), para que sem JavaScript e sob
+     movimento reduzido a composição apareça inteira, como design.md §11 pede. */
+  --abertura: 1;
+
+  --carta-w: clamp(160px, 17vw, 270px);
+  --passo-x: clamp(70px, 8.5vw, 150px);   /* afastamento por carta */
+  --passo-r: 5deg;                         /* giro por carta */
+  --passo-y: 16px;                         /* altura do arco, por unidade */
+  --recuo: .04;                            /* quanto cada carta encolhe */
+}
+.c-leque__carta {
+  position: absolute;
+  inset-inline-start: 50%;
+  /* Folga para o giro. O pivô é a base do card, então girar 15° joga o canto
+     de baixo para FORA da caixa, em metade da largura vezes o seno do
+     ângulo — medido, 28px numa carta de 218px. Sem esta folga as pontas do
+     leque invadiam os botões logo abaixo. */
+  inset-block-end: calc(var(--carta-w) * .13);
+  z-index: 1;
+  width: var(--carta-w);
+  margin: 0 0 0 calc(var(--carta-w) / -2);
+  aspect-ratio: 3 / 4;
+  border-radius: clamp(16px, 2vw, 30px);
+  overflow: hidden;
+  background: var(--c-grafite);   /* enquanto a foto não pinta */
+  /* Duas variáveis governam a sombra, e nenhuma delas é `box-shadow` em si:
+     o ALFA segue `--ab`, porque com as sete cartas empilhadas no início sete
+     sombras somadas viram um borrão escuro em volta da primeira foto; o
+     TAMANHO segue `--realce`, que é a variável do hover. Como `--realce` é
+     registrada e transicionada, a sombra cresce suave no hover sem que
+     `box-shadow` precise estar na lista de transição — e assim ela continua
+     acompanhando a rolagem no mesmo quadro, sem arrastar. */
+  box-shadow:
+    0 calc(24px * var(--realce)) calc(58px * var(--realce))
+    rgba(11, 10, 9, calc(.3 * var(--ab)));
+  /* O pivô embaixo é o que faz o giro ler como carta segurada na mão, e não
+     como imagem torta. */
+  transform-origin: bottom center;
+
+  --realce: 1;   /* só o hover mexe aqui; --abertura é herdada do palco */
+
+  /* Abertura DESTA carta. O progresso da seção é o mesmo para todas, mas cada
+     uma começa a sair um pouco depois da anterior: em `--abertura` baixa, só a
+     central está visível e as outras estão exatamente atrás dela; conforme
+     sobe, elas emergem em cascata, de dentro para fora. É o que dá a leitura
+     de cartas saindo de trás da primeira em vez de um leque abrindo em bloco. */
+  --ab: clamp(0, calc((var(--abertura) - var(--atraso)) / var(--janela)), 1);
+
+  translate:
+    calc(var(--i) * var(--passo-x) * var(--ab))
+    calc(var(--arco) * var(--passo-y) * var(--ab) * -1);
+  rotate: calc(var(--i) * var(--passo-r) * var(--ab));
+  scale: calc((1 - var(--d) * var(--recuo) * var(--ab)) * var(--realce));
+
+  /* Transiciona a VARIÁVEL do hover, não `scale`: translate, rotate e scale
+     são todos dirigidos pela rolagem e precisam responder no mesmo quadro. */
+  transition: --realce var(--d-elemento) var(--e-entrada);
+  will-change: translate, rotate, scale;
+}
+.c-leque__foto {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;   /* preenche sem distorcer */
+  user-select: none;
+}
+
+@media (hover: hover) {
+  /* O realce entra pela variável, então a rotação e o deslocamento da carta
+     continuam intactos — o leque não se desfaz ao passar o mouse. */
+  .c-leque__carta:hover {
+    --realce: 1.06;
+    z-index: 20;   /* vem para a frente sem perder a rotação do leque */
+  }
+}
+
+/* Tablet: leque mais fechado e cartas menores, para caber sem apertar. */
+@media (max-width: 1023px) {
+  .c-leque {
+    height: clamp(300px, 40vw, 420px);
+    --carta-w: clamp(140px, 19vw, 210px);
+    --passo-x: clamp(54px, 7.4vw, 100px);
+    --passo-r: 4.2deg;
+    --passo-y: 12px;
+  }
+}
+
+/* Celular: o leque não é comprimido, é reproporcionado. As cartas ficam mais
+   sobrepostas e menos giradas, e as das pontas aparecem só em parte — o
+   efeito continua reconhecível como leque, que era o pedido. */
+@media (max-width: 639px) {
+  .c-leque {
+    height: clamp(300px, 78vw, 420px);
+    --carta-w: clamp(116px, 34vw, 168px);
+    --passo-x: clamp(30px, 9vw, 52px);
+    --passo-r: 3.4deg;
+    --passo-y: 8px;
+    --recuo: .05;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .c-leque__carta { transition: none; }
+  .c-leque__carta:hover { --realce: 1; }
+}
+
+/* ==== Título que rola letra a letra ====================================
+   Porte do TextRoll (motion-primitives) para CSS. Cada letra tem duas faces
+   sobrepostas: a de cima gira 90° para trás e sai; a de baixo vem deitada e
+   gira até ficar reta. Mesma letra nas duas, então lê como um giro no eixo.
+
+   `backface-visibility: hidden` é o que faz cada face sumir ao passar da
+   perpendicular — sem isso as duas apareceriam espelhadas no meio do giro.
+   Os dois `transform-origin` diferentes são o que dá a impressão de painel
+   girando num pino, e não de letra tombando.
+   ====================================================================== */
+.rolagem__letra {
+  position: relative;
+  display: inline-block;
+  perspective: 800px;
+  transform-style: preserve-3d;
+}
+.rolagem__face {
+  position: absolute;
+  inset-block-start: 0;
+  inset-inline-start: 0;
+  backface-visibility: hidden;
+  transition: transform var(--d-secao) var(--e-entrada);
+}
+/* Os ângulos de repouso passam DOS 90°, e não é detalhe: a 90° exatos a face
+   fica de perfil, não de costas, então `backface-visibility` não a esconde e
+   ela renderiza como uma linha de 1px atravessando a letra — um fantasma sob
+   o título inteiro. Alguns graus além da perpendicular põem o verso para a
+   frente e a face some de verdade. */
+.rolagem__face--sai   { transform-origin: 50% 25%;  transform: rotateX(0deg); }
+.rolagem__face--entra { transform-origin: 50% 100%; transform: rotateX(96deg); }
+
+/* A terceira cópia é invisível e existe só para segurar a largura da letra:
+   as duas faces são absolutas e não ocupam espaço. Sem ela o título colapsaria
+   e a página teria layout shift, que design.md §11 proíbe. */
+.rolagem__espaco { visibility: hidden; }
+
+/* A defasagem cresce com o índice. A face que ENTRA sai um pouco depois da que
+   some, senão as duas cruzam a perpendicular no mesmo instante e a letra pisca. */
+.rolagem__letra { --atraso: calc(var(--i) * var(--defasagem, 42ms)); }
+.rolagem__face--sai   { transition-delay: var(--atraso); }
+.rolagem__face--entra { transition-delay: calc(var(--atraso) + 180ms); }
+
+.is-rolado .rolagem__face--sai   { transform: rotateX(-96deg); }
+.is-rolado .rolagem__face--entra { transform: rotateX(0deg); }
+
+/* Rolar de novo no HOVER e no FOCO. Como as três palavras de "Nas redes"
+   perderam a pílula, a borda e a seta, é este giro que diz que elas são
+   clicáveis — e ele não depende de cor nem de mouse, então serve também para
+   quem chega pelo teclado. Voltar às posições de repouso é o que produz o
+   giro: as faces trocam de lugar de novo. */
+@media (hover: hover) {
+  .is-rolado.rolagem--link:hover .rolagem__face--sai   { transform: rotateX(0deg); }
+  .is-rolado.rolagem--link:hover .rolagem__face--entra { transform: rotateX(96deg); }
+}
+.is-rolado.rolagem--link:focus-visible .rolagem__face--sai   { transform: rotateX(0deg); }
+.is-rolado.rolagem--link:focus-visible .rolagem__face--entra { transform: rotateX(96deg); }
+/* Defasagem mais curta na interação: a entrada pode se dar ao luxo de 42ms
+   por letra, mas resposta a ponteiro precisa ser rápida. */
+.rolagem--link:hover .rolagem__face,
+.rolagem--link:focus-visible .rolagem__face {
+  transition-delay: calc(var(--atraso) * .55);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .rolagem__face { transition: none; }
+}

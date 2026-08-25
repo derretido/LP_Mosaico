@@ -1,0 +1,690 @@
+/* ==========================================================================
+   sections.css — só o que é específico de cada seção.
+   Ritmo de fundos: D · D · L · L · D · L · L · D · L · L · L · D
+   ATENÇÃO: hero e manifesto são duas escuras seguidas. Pendente de decisão
+   (design.md §2 proíbe fora do bloco portfólio+TV).
+   ========================================================================== */
+
+/* ==== 2. Hero ==========================================================
+   Primeira dobra: retrato recortado (PNG com alpha) sobre fundo preto,
+   centralizado e apoiado na base. Sem véu e sem texto sobreposto — o fundo
+   fica livre para receber efeitos.
+   ====================================================================== */
+.s-hero {
+  position: relative;
+  padding-block: 0;
+
+  /* Único botão para regular o tamanho do retrato: 1 = altura cheia da dobra. */
+  --retrato-escala: .78;
+
+  /* Distância de rolagem que a animação consome, além da dobra visível.
+     Quanto maior, mais devagar a hero encolhe. */
+  --hero-pista: 100svh;
+  /* 0 no topo, 1 no fim da pista. Escrito por hero-scroll.js. */
+  --progresso: 0;
+  /* Escala do palco no fim da animação. hero-scroll.js sobrescreve com o valor
+     que faz o palco caber em 550x350px; o valor aqui é a reserva para quando o
+     JavaScript não roda. Precisa ficar na pista, e não no palco: declarada no
+     próprio palco, ela venceria o valor herdado que o JS escreve aqui. */
+  --escala-final: .64;
+
+  min-height: 100svh;
+  height: calc(100svh + var(--hero-pista));
+  /* Fundo da pista em Carvão, a cor do Manifesto: é o que aparece em volta do
+     palco quando ele encolhe, dando a leitura de que há outra seção atrás. */
+}
+
+/* O palco é o que fica preso e encolhe. `overflow` mora aqui, e não na section,
+   porque overflow diferente de visible num ancestral quebra o sticky. */
+.s-hero__palco {
+  position: sticky;
+  top: 0;
+  height: 100svh;
+  overflow: hidden;
+  transform-origin: 50% 50%;         /* encolhe pelo centro, nos dois eixos */
+  scale: calc(1 - (1 - var(--escala-final)) * var(--progresso));
+  /* O raio compensa a própria escala: dividido por ela, o arredondamento que
+     aparece na tela fica constante em ~44px, em vez de encolher junto. */
+  border-radius: calc(var(--r-xl) * .92 / var(--escala-final) * var(--progresso));
+  will-change: scale;
+}
+/* Véu de afastamento: a hero escurece de leve enquanto recua, o que ajuda a
+   ler a profundidade em vez de parecer só um redimensionamento. */
+.s-hero__palco::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  pointer-events: none;
+  background: #000;
+  opacity: calc(.28 * var(--progresso));
+}
+
+/* No celular a pista é mais curta: com o polegar, uma dobra inteira presa
+   passa a sensação de que a página travou. */
+@media (max-width: 767px) {
+  .s-hero { --hero-pista: 62svh; }
+  .s-hero__palco { scale: calc(1 - .24 * var(--progresso)); }
+}
+
+/* Sem animação de rolagem quando o sistema pede movimento reduzido: a pista
+   encolhe para uma dobra e o palco deixa de ser preso (site.md §12). */
+@media (prefers-reduced-motion: reduce) {
+  .s-hero { height: 100svh; }
+  .s-hero__palco { position: static; scale: 1; border-radius: 0; }
+  .s-hero__palco::before { opacity: 0; }
+  /* Sem a animação de rolagem o progresso fica em 0 e nada seria revelado:
+     aqui a marca aparece inteira, de uma vez. */
+  .s-hero__marca { clip-path: none; }
+}
+/* Camada da tinta neon: ocupa a dobra inteira, no fundo de tudo.
+   Qualquer conteúdo da hero (logo, título, botão) entra acima dela, a partir
+   de z-index 2 — o retrato já ocupa o 1. */
+.s-hero__efeito {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  background: #000;   /* preto puro por baixo do canvas */
+}
+/* Véu curto no topo: sem ele a tinta passa por trás do menu e derruba o
+   contraste da navegação. Só cobre a faixa do header. */
+.s-hero__efeito::after {
+  content: "";
+  position: absolute;
+  inset: 0 0 auto 0;
+  height: calc(var(--altura-header) + var(--sp-6));
+  background: linear-gradient(180deg, #000 0%, #000 34%, rgba(0, 0, 0, .82) 58%, transparent 100%);
+  pointer-events: none;
+}
+
+.s-hero__foto {
+  position: absolute;
+  inset: var(--altura-header) 0 0;   /* o retrato começa abaixo do header */
+  z-index: 1;                        /* na frente da tinta */
+  pointer-events: none;              /* o mouse atravessa e alimenta a tinta */
+
+  /* Escritas por retrato-3d.js. Ficam em zero quando o efeito não roda —
+     no mobile, sob movimento reduzido ou sem JavaScript. */
+  --giro-x: 0deg;
+  --giro-y: 0deg;
+  --desloc-x: 0px;
+  --desloc-y: 0px;
+
+  /* A perspectiva fica no pai porque o ponto de fuga de perspective() é o
+     transform-origin, e o do retrato é a base — a fuga sairia por baixo.
+     Aqui ela fica na altura do rosto, que é como o olho lê a cena. */
+  perspective: 1100px;
+  perspective-origin: 50% 42%;
+}
+/* Penumbra atrás do retrato. Nasceu para esconder o retângulo de uma foto sem
+   alfa; o retrato v3 é recortado de verdade, então ela deixou de ser remendo e
+   virou o que aparenta ser: a sombra que apoia a figura no chão da cena e faz
+   a tinta mergulhar no escuro ao se aproximar. z-index negativo mantém a
+   sombra atrás da foto, sem escurecer o rosto. */
+.s-hero__foto::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background: radial-gradient(ellipse 48% 64% at 50% 76%,
+              rgba(0, 0, 0, .95) 0%, rgba(0, 0, 0, .86) 36%,
+              rgba(0, 0, 0, .5) 62%, rgba(0, 0, 0, 0) 84%);
+  /* Contrária à do retrato: é o desencontro entre as duas camadas que dá
+     profundidade, mais do que a inclinação sozinha. */
+  transform: translate3d(calc(var(--desloc-x) * -.42), calc(var(--desloc-y) * -.42), 0);
+}
+.s-hero__foto picture { display: contents; }   /* <picture> não vira caixa */
+.s-hero__foto img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;               /* retrato inteiro, sem corte */
+  object-position: 50% 100%;         /* centralizado e apoiado na base */
+  /* A escala fica por último para o pivô da base continuar valendo; giro e
+     deslocamento vêm de retrato-3d.js e são zero em repouso. */
+  transform: rotateX(var(--giro-x)) rotateY(var(--giro-y))
+             translate3d(var(--desloc-x), var(--desloc-y), 0)
+             scale(var(--retrato-escala));
+  transform-origin: 50% 100%;        /* encolhe sem descolar da base */
+  will-change: transform;
+
+  /* Sem máscara: o v3 já vem recortado com canal alfa, e a máscara radial que
+     dissolvia a moldura da foto antiga passaria a comer ombro e borda do
+     recorte de verdade. O filtro fica: a foto é iluminada sobre fundo claro e
+     sem ele o retrato lê mais claro e mais contrastado que tudo em volta. */
+  filter: brightness(.84) contrast(1.08) saturate(.88);
+}
+
+/* Assinatura MOSAICO. Camada mais alta do palco: passa por cima do retrato,
+   do grão e do véu de afastamento. Não recebe ponteiro, para não roubar o
+   cursor da tinta nem o clique de nada. */
+.s-hero__marca {
+  position: absolute;
+  z-index: 4;
+  inset-block-start: 50%;
+  inset-inline-start: 50%;
+  transform: translate(-50%, -50%) rotate(-6deg);
+  color: var(--c-rosa);
+  text-align: center;
+  white-space: nowrap;
+  /* O CORPO DA MARCA MORA AQUI, no bloco, e não em cada linha. As duas linhas
+     são IRMÃS, então um `em` declarado no CONCEPT seria relativo a este pai —
+     não ao MOSAICO ao lado. Com o corpo aqui, `1em` e `.22em` nas filhas
+     mantêm a proporção travada entre elas em qualquer tamanho de tela. */
+  font-size: clamp(3rem, 13.5vw, 11rem);
+  pointer-events: none;   /* não rouba o cursor da tinta */
+  user-select: none;
+
+  /* REVELADA pela rolagem, por varredura. Forma tipográfica é preenchida, não
+     traço com centro, então `stroke-dashoffset` deixou de servir quando a
+     marca voltou a ser texto. A conta termina em 82% da pista, para a marca
+     ficar pronta e parada antes do fim da animação da hero. */
+  --escrita: min(1, var(--progresso) / .82);
+  clip-path: inset(0 calc((1 - var(--escrita)) * 100%) 0 0);
+}
+/* Registrada como número: `--escrita` guarda um `min()`, e função aninhada
+   dentro de `calc()` não resolve na multiplicação. É a terceira vez que este
+   tropeço aparece no projeto — leque, sombra do leque e aqui. */
+@property --escrita {
+  syntax: "<number>";
+  inherits: true;
+  initial-value: 1;
+}
+.s-hero__marca__nome {
+  margin: 0;
+  font-family: var(--f-display);
+  font-weight: 800;
+  font-size: 1em;
+  letter-spacing: -.045em;
+  line-height: .84;
+}
+/* CONCEPT em 22% do corpo da marca — o mesmo corpo de que o MOSAICO tira
+   seu `1em`, então a proporção entre os dois fica travada e não se desfaz
+   quando a hero encolhe.
+
+   A margem NEGATIVA à esquerda é correção de eixo, resolvida por medida e não
+   por dedução: o espaçamento de .58em que sobra depois do T, somado ao
+   tracking negativo do MOSAICO, deixava a tinta do CONCEPT 9.7px à direita do
+   eixo da palavra de cima. Eu tinha suposto que a margem deslocasse o
+   conteúdo centrado pela METADE do seu valor — não desloca: medindo a
+   resposta em dois pontos, ela é de 18.9px por `em`, e a margem que zera o
+   desvio é -.514em. Verificado: 0px. Em `em`, a correção acompanha qualquer
+   tamanho de tela. */
+.s-hero__marca__concept {
+  margin: .04em 0 0 -.514em;
+  font-family: var(--f-display);
+  font-weight: 600;
+  font-size: .22em;
+  letter-spacing: .58em;
+  line-height: 1;
+}
+
+@media (max-width: 767px) {
+  /* No celular a assinatura atravessa quase a tela inteira, então perde parte
+     da inclinação para não encostar nas bordas. */
+  .s-hero__marca {
+    width: 84%;
+    transform: translate(-50%, -50%) rotate(-4deg);
+  }
+}
+
+/* Grão fino sobre a dobra inteira. O shader já põe grão na tinta; aqui ele
+   cobre também a foto, para os dois materiais parecerem a mesma imagem.
+   Fica no palco, e não na section, para encolher junto com a hero.
+   Conteúdo da hero, quando existir, entra a partir de z-index 4. */
+.s-hero__palco::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;
+  opacity: .09;
+  mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+/* No celular a foto (paisagem, contida e apoiada na base) vira uma faixa baixa,
+   então a sombra e a máscara precisam descer junto com ela. */
+@media (max-width: 767px) {
+  .s-hero__foto::before {
+    background: radial-gradient(ellipse 62% 40% at 50% 90%,
+                rgba(0, 0, 0, .96) 0%, rgba(0, 0, 0, .9) 32%,
+                rgba(0, 0, 0, .58) 58%, rgba(0, 0, 0, 0) 86%);
+  }
+  .s-hero__foto img {
+    -webkit-mask-image: radial-gradient(ellipse 50% 33% at 50% 88%,
+                        #000 0%, #000 60%, rgba(0, 0, 0, .5) 82%, transparent 98%);
+    mask-image: radial-gradient(ellipse 50% 33% at 50% 88%,
+                #000 0%, #000 60%, rgba(0, 0, 0, .5) 82%, transparent 98%);
+  }
+}
+
+.s-hero__rolagem {
+  position: absolute;
+  inset-block-end: var(--sp-5);
+  inset-inline-end: var(--margem);
+  z-index: 2;
+  display: none;
+  align-items: center;
+  gap: var(--sp-2);
+  font-size: var(--t-label);
+  letter-spacing: var(--ls-label);
+  text-transform: uppercase;
+  color: var(--c-platina);
+}
+@media (min-width: 1024px) { .s-hero__rolagem { display: flex; } }
+.s-hero__rolagem i {
+  display: block;
+  width: 1px;
+  height: 40px;
+  background: linear-gradient(var(--c-platina), transparent);
+}
+
+/* ==== 3. Manifesto ===================================================== */
+.s-manifesto { overflow: hidden; }
+.s-manifesto__frase {
+  /* É o <h1> da página desde 2026-08-22. margin zerada porque a margem
+     padrão de h1 do navegador brigaria com o respiro da seção. */
+  margin-block: 0;
+  font-size: var(--t-display);
+  font-weight: 800;
+  line-height: var(--lh-display);
+  letter-spacing: var(--ls-display);
+  text-transform: uppercase;
+  max-width: 18ch;
+  text-wrap: balance;
+  /* Centralizada, como design.md §8 já previa para o Manifesto. */
+  margin-inline: auto;
+  text-align: center;
+}
+.s-manifesto .serif { color: var(--c-rosa); }
+/* CTAs do Manifesto. Centralizados para acompanhar a frase, e segurados até
+   a cascata de palavras fechar — senão competem com o texto sendo escrito. */
+.s-manifesto__acoes {
+  --atraso: 1400ms;
+  justify-content: center;
+  margin-block-start: var(--sp-7);
+}
+.s-manifesto__assinatura {
+  margin-block-start: var(--sp-7);
+  padding-block-start: var(--sp-5);
+  border-block-start: 1px solid var(--c-linha-escura);
+  max-width: 40ch;
+}
+
+/* ==== 4. Platinado Concept ============================================= */
+.s-platinado__processo {
+  display: grid;
+  gap: var(--sp-4);
+  margin-block-start: var(--sp-6);
+  padding-block-start: var(--sp-5);
+  border-block-start: 1px solid var(--linha);
+}
+@media (min-width: 480px) { .s-platinado__processo { grid-template-columns: repeat(3, 1fr); } }
+.s-platinado__processo dt {
+  font-size: var(--t-label);
+  letter-spacing: var(--ls-label);
+  text-transform: uppercase;
+  color: var(--etiqueta);
+}
+.s-platinado__processo dd {
+  font-size: 1.0625rem;
+  font-weight: 700;
+  margin-block-start: var(--sp-1);
+}
+
+/* ==== 5. Serviços ====================================================== */
+.s-servicos { background: var(--c-nevoa); }
+/* O card claro desta seção usa Osso em vez da superfície padrão. A variante
+   escura precisa ficar de fora, senão esta regra vence a dela por
+   especificidade e por vir depois na ordem das folhas. */
+.s-servicos .c-servico:not(.c-servico--escuro) { background: var(--c-osso); }
+.s-servicos__fecho {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--sp-5);
+  margin-block-start: var(--sp-7);
+  padding-block-start: var(--sp-6);
+  border-block-start: 1px solid var(--linha);
+}
+
+/* ==== 6. Portfólio ===================================================== */
+.s-portfolio .c-trilho { margin-inline: calc(var(--margem) * -1); }
+.s-portfolio .l-container > .l-cabecalho { margin-block-end: var(--sp-7); }
+
+/* ==== 7. Live Criativo ================================================= */
+.s-live__faixa {
+  position: relative;
+  height: 60vh;
+  min-height: 420px;
+  margin-block-start: var(--sp-7);
+  overflow: hidden;
+}
+.s-live__faixa img { width: 100%; height: 100%; object-fit: cover; }
+.s-live__faixa::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, rgba(11,10,9,.82) 0%, rgba(11,10,9,.45) 45%, rgba(11,10,9,.1) 100%);
+}
+.s-live__sobreposto {
+  position: absolute;
+  inset-block-end: 0;
+  inset-inline-start: 0;
+  z-index: 2;
+  width: 100%;
+  padding: var(--sp-6) var(--margem);
+  color: var(--c-osso);
+}
+.s-live__sobreposto .etiqueta { color: var(--c-platina); }
+.s-live__sobreposto .lead { color: rgba(242,239,233,.78); }
+@media (min-width: 768px) {
+  .s-live__sobreposto { padding: var(--sp-8); max-width: 40rem; }
+}
+
+/* ==== 8. Cursos ======================================================== */
+.s-cursos .c-curso { background: var(--c-nevoa); }
+
+/* ==== 9. Mosaico TV ==================================================== */
+.s-tv__fecho {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--sp-5);
+  margin-block-start: var(--sp-7);
+  padding-block-start: var(--sp-6);
+  border-block-start: 1px solid var(--linha);
+}
+
+/* ==== 10. Prova social ================================================= */
+.s-depoimentos { background: var(--c-nevoa); }
+.s-depoimentos .c-citacao { background: var(--c-osso); }
+
+/* ==== 11. Agendamento e localização ==================================== */
+.s-agendar__mapa { border-radius: var(--r-lg); overflow: hidden; border: 1px solid var(--linha); }
+.s-agendar__contato { display: grid; gap: var(--sp-6); }
+.s-agendar__linha {
+  display: grid;
+  gap: var(--sp-1);
+  padding-block-end: var(--sp-4);
+  border-block-end: 1px solid var(--linha);
+}
+.s-agendar__linha dt {
+  font-size: var(--t-label);
+  letter-spacing: var(--ls-label);
+  text-transform: uppercase;
+  color: var(--etiqueta);
+}
+.s-agendar__linha dd { font-size: 1.0625rem; font-weight: 600; }
+
+/* ==== 12. FAQ ========================================================== */
+.s-faq { background: var(--c-nevoa); }
+.s-faq .l-dupla { align-items: start; }
+
+/* ==== 13. Footer ======================================================= */
+.s-footer {
+  background: var(--c-rosa);   /* exceção única à regra de dosagem — design.md §2 */
+  padding-block: 0 var(--sp-5);
+  padding-inline: 0;
+}
+.s-footer .l-container { padding-inline: var(--sp-3); }
+@media (min-width: 768px) { .s-footer .l-container { padding-inline: var(--margem); } }
+.s-footer__marca {
+  font-size: clamp(2.5rem, 9vw, 6rem);
+  font-weight: 800;
+  line-height: .9;
+  letter-spacing: -.03em;
+  text-transform: uppercase;
+  max-width: 14ch;
+}
+.s-footer__marca .serif { color: var(--c-rosa); }
+
+/* ==== Módulos opcionais: pendentes de conteúdo real ==================== */
+[data-modulo="opcional"] { position: relative; }
+[data-modulo="opcional"]::before {
+  content: "MÓDULO OPCIONAL — só publica com conteúdo real";
+  position: absolute;
+  inset-block-start: 0;
+  inset-inline-start: 0;
+  z-index: 5;
+  padding: 6px var(--sp-4);
+  background: var(--c-erro);
+  color: #fff;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: .1em;
+}
+
+/* ==== Topografia de fundo ==============================================
+   Curvas de nível animadas atrás das seções escuras do trecho hero→portfólio.
+   Fica no fundo da seção; o conteúdo sobe para z-index 1. `pointer-events`
+   desligado para o conteúdo continuar clicável — o cursor é lido na janela.
+   ====================================================================== */
+.s-fundo-topo {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+.s-fundo-topo .topografia {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+/* Todo irmão da camada sobe para z-index 1, senão o conteúdo estático da
+   seção pintaria por baixo do canvas, que é posicionado. */
+.s-manifesto > :not(.s-fundo-topo),
+.s-portfolio > :not(.s-fundo-topo),
+.s-platinado > :not(.s-fundo-topo),
+.s-servicos > :not(.s-fundo-topo) {
+  position: relative;
+  z-index: 1;
+}
+
+/* ==== Emenda entre seções ==============================================
+   Só entre Osso e Névoa, que estão a 11 pontos de luminância um do outro.
+   Entre Carvão e Osso a distância é de 204 pontos: ali qualquer degradê vira
+   uma mancha escura entrando na seção clara, e a borda dura é o certo — é a
+   alternância que marca os capítulos, conforme design.md §2.
+   `::after` é gerado por último, então pinta acima da camada de topografia
+   (z-index 0) e abaixo do conteúdo (z-index 1).
+   Os dois pontos usam o MESMO RGB, mudando só o alfa: terminar em
+   `transparent` — preto com alfa 0 — sujaria o meio da passagem.
+   ====================================================================== */
+.s-servicos::after {
+  content: "";
+  position: absolute;
+  inset: 0 0 auto 0;
+  z-index: 0;
+  height: clamp(96px, 12vw, 200px);
+  pointer-events: none;
+  background: linear-gradient(180deg, #F2EFE9 0%, rgba(242, 239, 233, 0) 100%);
+}
+
+/* No entorno da hero a camada fica presa junto com o palco, em vez de esticar
+   pela pista inteira: o padrão fica parado atrás da hero que encolhe, e o
+   canvas continua do tamanho de uma dobra. */
+/* A camada em si continua absoluta, cobrindo a pista inteira: `sticky` aqui
+   a manteria no fluxo, ocupando uma dobra de altura e empurrando o palco para
+   baixo — foi o que deixou o topo da hero preto e vazio.
+   Quem prende é o canvas dentro dela, que fica em fluxo e pode grudar. */
+.s-fundo-topo--preso {
+  /* Só entra conforme a hero encolhe: com a hero em tela cheia o palco cobre
+     tudo e a topografia não deve existir ainda. */
+  opacity: var(--progresso);
+  /* Precisa ser visible: overflow diferente disso torna esta camada o
+     scrollport do canvas e ele deixa de grudar. Nada transborda de qualquer
+     forma — o canvas mede uma dobra dentro de uma pista de duas. */
+  overflow: visible;
+}
+.s-fundo-topo--preso .topografia {
+  position: sticky;
+  top: 0;
+  height: 100svh;
+}
+
+/* Vídeo do Platinado, no lugar do comparador antes/depois.
+   O material é vertical (9:16), então a caixa acompanha a proporção do
+   arquivo em vez de recortá-lo. A largura é limitada para uma peça vertical
+   não dominar a coluna de mídia, e fica centralizada nela.
+   Raio de card de mídia, conforme design.md §7. */
+.s-platinado__video {
+  display: block;
+  width: 100%;
+  max-width: 400px;
+  height: auto;
+  aspect-ratio: 9 / 16;
+  margin-inline: auto;
+  border-radius: var(--r-lg);
+  background: var(--c-carvao);
+}
+
+/* ==== 6b. Nas redes ====================================================
+   Dobra clara entre o Portfólio (Piche) e a faixa rosa do rodapé: é o
+   respiro que impede três blocos escuros seguidos. */
+.s-redes {
+  background: var(--c-osso);
+  /* `clip` e não `hidden`: corta o transbordo lateral das cartas giradas sem
+     transformar a seção em scrollport, o que quebraria qualquer sticky. */
+  overflow-x: clip;
+}
+/* Cabeçalho centralizado. `design.md` §8 manda alinhar cabeçalho de seção à
+   esquerda por padrão, reservando o centro ao Manifesto e ao CTA final — esta
+   é uma exceção pedida pelo cliente em 2026-08-22, e ela tem lógica própria:
+   o leque e as três redes já são composições centradas, então o título à
+   esquerda era o único elemento fora do eixo da dobra. */
+.s-redes .l-fluxo { text-align: center; }
+/* O lead tem limite de leitura de 46ch; centralizado, ele precisa das margens
+   automáticas, senão a caixa fica à esquerda e só o texto dentro dela centra. */
+.s-redes .l-fluxo .lead { margin-inline: auto; }
+
+.s-redes__acoes {
+  justify-content: center;
+  margin-block-start: var(--sp-8);
+}
+
+/* As três redes: palavra pura, sem cara de botão. O que sinaliza o link é o
+   giro das letras no hover e no foco — ver .rolagem--link em components.css. */
+.s-redes__acoes {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  /* Vão de coluna generoso, vão de linha curto: no celular as três quebram em
+     duas linhas, e o mesmo valor nos dois eixos abria um buraco entre elas. */
+  column-gap: clamp(var(--sp-5), 5vw, var(--sp-9));
+  row-gap: var(--sp-2);
+  margin-block-start: var(--sp-8);
+}
+.s-redes__rede {
+  /* inline-BLOCK, e não inline-flex: em contêiner flex a especificação descarta
+     os nós de texto que só têm espaço, e "Mosaico TV" saía grudado como
+     "MosaicoTV". O alvo de toque de 44px de site.md §11 vem do recuo vertical,
+     que é só vertical para a palavra não ganhar a silhueta de botão que o
+     cliente pediu para tirar. Medido: 46px na menor escala, 59px na maior. */
+  display: inline-block;
+  padding-block: var(--sp-3);
+  font-family: var(--f-display);
+  font-size: clamp(1.25rem, 2.6vw, 2rem);
+  font-weight: 700;
+  letter-spacing: -.01em;
+  text-transform: uppercase;
+  color: var(--texto);
+  text-decoration: none;
+}
+/* Sem endereço no config.js a rede fica desativada. Com a estética de botão
+   removida, o único sinal possível é o peso da cor — daí a opacidade. */
+.s-redes__rede[aria-disabled="true"] {
+  opacity: .38;
+  cursor: not-allowed;
+}
+
+/* ==== Transição por sobreposição: Manifesto → foto do Platinado =========
+   O comportamento pedido — seção anterior presa, próxima subindo por cima —
+   sai inteiro de `position: sticky` mais ordem de documento. Não é animação
+   disparada: é a própria rolagem movendo a camada de cima, então acompanha o
+   dedo, para junto e desfaz ao subir, de graça.
+
+   CUIDADO QUE ESTE PROJETO JÁ PAGOU DUAS VEZES (ver memoria.md): overflow
+   diferente de `visible` num ANCESTRAL torna esse ancestral o scrollport do
+   sticky e o efeito morre. Por isso o invólucro não pode ganhar overflow, e é
+   por isso também que o `overflow-x: clip` do body serve — `clip` não cria
+   scrollport, ao contrário de `hidden`.
+   ====================================================================== */
+.c-sobrepor {
+  position: relative;
+  /* contexto de empilhamento próprio: o 1 e o 2 abaixo não disputam com os
+     z-index de 80 a 200 do menu e do CTA flutuante */
+  isolation: isolate;
+}
+.c-sobrepor__base {
+  position: sticky;
+  /* Prende pelo TOPO, com deslocamento NEGATIVO. A intenção é prender no fim
+     da seção — o usuário lê a frase inteira e só então ela congela —, que é a
+     semântica de `sticky` com `bottom`. Medido neste navegador: com `bottom`
+     ela não prende, a borda inferior continua subindo; com `top` ela trava.
+     Então `top` recebe a sobra (dobra menos altura da seção), calculada em
+     sobrepor.js, e o resultado é o mesmo: congela mostrando a última dobra,
+     com os CTAs à vista. Sem JavaScript cai em 0 e prende pelo começo — pior,
+     mas funcional. */
+  inset-block-start: var(--topo-preso, 0px);
+  z-index: 1;
+  /* Piso de uma dobra, para telas onde a frase couber em menos linhas: sem
+     isto sobraria faixa vazia por onde a foto subiria. `dvh` e não `vh`
+     porque no celular a barra do navegador muda a altura útil. */
+  min-height: 100dvh;
+  display: grid;
+  align-content: center;
+}
+.c-sobrepor__cobre {
+  position: relative;
+  z-index: 2;          /* a camada de cima — é isto que faz ela cobrir */
+  height: 100dvh;
+  background: var(--c-piche);
+  /* Pistas de profundidade, discretas: a sombra na aresta de cima entrega que
+     há uma camada chegando, e o raio tira o corte reto de guilhotina. */
+  border-start-start-radius: clamp(16px, 2.4vw, 34px);
+  border-start-end-radius: clamp(16px, 2.4vw, 34px);
+  box-shadow: 0 -26px 60px rgba(0, 0, 0, .5);
+  overflow: hidden;    /* aqui pode: não é ancestral de nada que gruda */
+}
+.s-transicao picture { display: contents; }
+.s-transicao__foto {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: 50% 42%;   /* mantém os rostos no enquadramento */
+}
+
+/* No celular a foto é uma faixa de 2:1 numa tela de 1:2 — `cover` cortaria
+   quase tudo e sobraria um rosto só. Ela passa a aparecer inteira, centrada
+   sobre o fundo escuro do painel, e quem cobre a tela continua sendo o
+   painel, que é o que o efeito precisa. */
+@media (max-width: 767px) {
+  .s-transicao {
+    display: grid;
+    /* `align-content`, e NÃO `place-content`: centralizar nos dois eixos faz a
+       trilha ser dimensionada pelo conteúdo, e aí o `width: 100%` da imagem
+       vira referência circular e ela colapsa para 0x0 — medido. Centralizando
+       só na vertical, a imagem continua esticada na horizontal. */
+    align-content: center;
+  }
+  .s-transicao__foto {
+    width: 100%;
+    height: auto;
+    /* A caixa passa a ter a proporção da própria foto, então `cover` não corta
+       nada: ela aparece inteira, centrada no painel escuro. Quem cobre a tela
+       continua sendo o painel, que é o que o efeito precisa. */
+    aspect-ratio: 1600 / 777;
+  }
+}
+
+/* Movimento reduzido: sem prender e sem sobrepor. As duas seções voltam a ser
+   blocos normais, um depois do outro (site.md §12). */
+@media (prefers-reduced-motion: reduce) {
+  .c-sobrepor__base { position: static; min-height: 0; }
+  .c-sobrepor__cobre { box-shadow: none; height: auto; }
+}

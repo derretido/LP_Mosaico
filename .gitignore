@@ -1,0 +1,79 @@
+# ==========================================================================
+# .gitignore — Mosaico
+#
+# Regra: a Vercel publica exatamente o que está no Git. Então tudo que o
+# navegador não precisa baixar não entra aqui — nem por peso, nem por ser
+# assunto interno do projeto.
+# ==========================================================================
+
+
+# --- Sistema operacional e editores ---------------------------------------
+.DS_Store
+.DS_Store?
+._*
+Thumbs.db
+*.swp
+.idea/
+.vscode/
+
+
+# --- Dependências e caches de build ---------------------------------------
+# node_modules são 61 MB reinstaláveis com `npm ci`. Nunca vão para o Git.
+node_modules/
+.vite/
+dist/
+.vercel/
+npm-debug.log*
+yarn-error.log*
+
+
+# --- Segredos --------------------------------------------------------------
+# Nada aqui hoje, mas a trava fica pronta: chave em site estático é chave
+# pública, e chave pública é chave vazada.
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+
+
+# --- Ferramentas locais, não fazem parte do site ---------------------------
+# servidor.py só serve a página na sua máquina; pre-publicacao.sh é a trava
+# de revisão. Publicados, virariam arquivos legíveis por qualquer visitante.
+ferramentas/
+
+# Configuração da sua máquina (aponta para um caminho absoluto local).
+.claude/
+
+
+# --- Documentação e página interna -----------------------------------------
+# specs/ é o dossiê de decisão do projeto. componentes.html é o catálogo de
+# componentes: útil para você, mas ficaria público em /componentes.html.
+specs/
+componentes.html
+assets/img/LEIA-ME.md
+
+
+# --- Marcadores de layout (SVG) --------------------------------------------
+# São placeholders para segurar proporção enquanto as fotos reais não chegam.
+# O próprio LEIA-ME.md diz que nenhum deve ir ao ar. Hoje só componentes.html
+# os usava — o index.html não referencia nenhum deles.
+assets/img/cursos/
+assets/img/live/
+assets/img/local/
+assets/img/og/
+assets/img/portfolio/
+assets/img/tv/
+assets/img/platinado/antes.svg
+assets/img/platinado/depois.svg
+
+
+# --- Originais de foto não usados pelo site --------------------------------
+# Ficam no seu disco, fora do deploy. ~4 MB que nenhuma página pede:
+# FotoM01–07 já viraram assets/img/redes/post-*.avif (é o que o leque carrega),
+# Retratov3.png já virou assets/img/hero/retrato.png,
+# FotoC10 e platinadoconcept.jpeg não aparecem em lugar nenhum do HTML.
+images/FotoM*.jpeg
+images/FotoC10.jpeg
+images/Retratov3.png
+images/platinadoconcept.jpeg

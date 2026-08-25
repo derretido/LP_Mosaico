@@ -42,8 +42,8 @@
   --foco:         var(--c-carvao);
 
   /* ---------- Tipografia ---------- */
-  --f-display: "Archivo", "Helvetica Neue", Arial, sans-serif;
-  --f-serif:   "Instrument Serif", Georgia, "Times New Roman", serif;
+  --f-display: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --f-serif:   Georgia, "Times New Roman", "Nimbus Roman", serif;
 
   --t-display: clamp(3.25rem, 11vw, 8.5rem);
   --t-h1:      clamp(2.5rem, 7vw, 5.5rem);

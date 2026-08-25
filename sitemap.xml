@@ -1,9 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- [A DEFINIR] — trocar o domínio antes de publicar -->
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
-    <loc>https://exemplo.com.br/</loc>
-    <lastmod>2026-08-19</lastmod>
+    <loc>https://mosaico.vercel.app/</loc>
+    <lastmod>2026-08-25</lastmod>
     <changefreq>monthly</changefreq>
     <priority>1.0</priority>
   </url>

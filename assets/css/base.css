@@ -2,28 +2,13 @@
    base.css — reset, fontes, tipografia padrão, foco
    ========================================================================== */
 
-/* ---------- Fontes autohospedadas (assets/fonts/LEIA-ME.md) ---------- */
-@font-face {
-  font-family: "Archivo";
-  src: url("../fonts/archivo-var-latin.woff2") format("woff2");
-  font-weight: 400 800;
-  font-style: normal;
-  font-display: swap;
-}
-@font-face {
-  font-family: "Instrument Serif";
-  src: url("../fonts/instrument-serif-latin.woff2") format("woff2");
-  font-weight: 400;
-  font-style: normal;
-  font-display: swap;
-}
-@font-face {
-  font-family: "Instrument Serif";
-  src: url("../fonts/instrument-serif-italic-latin.woff2") format("woff2");
-  font-weight: 400;
-  font-style: italic;
-  font-display: swap;
-}
+/* ---------- Fontes ----------
+   O site usa a pilha do sistema. Os @font-face de Archivo e Instrument Serif
+   saíram em 2026-08-25: apontavam para assets/fonts/, que nunca existiu, e
+   em produção davam 404 — o navegador já caía no fallback. Para voltar a
+   autohospedar, coloque os .woff2 em assets/fonts/, redeclare os @font-face
+   aqui e recoloque os nomes no topo de --f-display e --f-serif (tokens.css).
+   -------------------------------------------------------------------- */
 
 /* ---------- Reset ---------- */
 *, *::before, *::after { box-sizing: border-box; }

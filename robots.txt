@@ -1,5 +1,4 @@
 User-agent: *
 Allow: /
 
-# [A DEFINIR] — trocar pelo domínio real antes de publicar
-Sitemap: https://exemplo.com.br/sitemap.xml
+Sitemap: https://mosaico.vercel.app/sitemap.xml

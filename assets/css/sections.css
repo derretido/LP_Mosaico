@@ -259,6 +259,55 @@
   }
 }
 
+/* Celular com o viewport travado em 1280px (index.html): as @media de largura
+   acima nunca mais disparam, porque a página SEMPRE se mede como 1280. O que
+   continua diferente do PC é a FORMA da dobra, não o tamanho — o telefone é
+   retrato e o monitor é paisagem, e isso a escala não corrige.
+
+   Isso quebra só o retrato. Ele é 3:2 e usa `contain`, então numa dobra retrato
+   ele encosta nas laterais e sobra faixa preta em cima: medido em 293x195 numa
+   dobra de 375x812, ou 24% da altura, contra 70% no PC.
+
+   A correção é dimensionar a foto pela ALTURA em vez de pela largura. A caixa
+   passa a ter a proporção do arquivo, `contain` deixa de sobrar borda, e a
+   figura volta a ocupar a mesma fatia vertical que ocupa no desktop. O que
+   passa da largura é recortado pelo overflow do palco — e é transparente, já
+   que o retrato é recortado com alfa.
+
+   `pointer: coarse` é o gancho certo aqui: com a largura congelada em 1280 não
+   existe mais media query de largura capaz de separar telefone de monitor. */
+/* ---- Enquadramento do retrato em tela de toque ------------------------
+   Com o viewport travado em 1280px (index.html), as @media de LARGURA acima
+   nunca mais disparam: a página sempre se mede como 1280, no celular e no
+   monitor. O que a escala não corrige é a FORMA da dobra — o telefone é
+   retrato, o monitor é paisagem — e é só isso que ainda separa os dois.
+
+   Quem sofre com isso é o retrato. Ele é 3:2 e usa `contain`, então numa dobra
+   retrato ele é limitado pela LARGURA e vira uma faixa baixa: medido em 24% da
+   altura da dobra, contra 70% no PC. `--retrato-escala` é o botão que o próprio
+   CSS já expõe para isso, e escalar resolve sem tocar em layout — a escala tem
+   `transform-origin: 50% 100%`, então cresce a partir da base e centrada na
+   horizontal, e o excesso é cortado pelo overflow do palco, onde a foto é
+   transparente.
+
+   Redimensionar a caixa pela altura também resolveria a altura, mas não serve:
+   uma caixa mais larga que o pai não centraliza. Em fluxo normal `margin: auto`
+   vira zero, e em posicionamento absoluto a spec manda alinhar à esquerda em
+   vez de deixar margem negativa — nos dois casos a foto encostou na borda
+   esquerda, medido.
+
+   Os valores são por proporção de tela, e não por `pointer: coarse` sozinho,
+   porque um tablet também é toque: deitado ele tem dobra de monitor e o padrão
+   de .78 já está certo. Quanto mais estreita a dobra, mais a foto precisa
+   crescer para ocupar a mesma fatia vertical que ocupa no desktop. */
+@media (pointer: coarse) and (max-aspect-ratio: 3 / 4) {
+  .s-hero { --retrato-escala: 1.45; }   /* tablet em pé */
+}
+@media (pointer: coarse) and (max-aspect-ratio: 1 / 2) {
+  .s-hero { --retrato-escala: 1.8; }    /* celular em pé */
+}
+
+
 .s-hero__rolagem {
   position: absolute;
   inset-block-end: var(--sp-5);
@@ -659,28 +708,41 @@
   object-position: 50% 42%;   /* mantém os rostos no enquadramento */
 }
 
-/* No celular a foto é uma faixa de 2:1 numa tela de 1:2 — `cover` cortaria
-   quase tudo e sobraria um rosto só. Ela passa a aparecer inteira, centrada
-   sobre o fundo escuro do painel, e quem cobre a tela continua sendo o
-   painel, que é o que o efeito precisa. */
-@media (max-width: 767px) {
-  .s-transicao {
-    display: grid;
-    /* `align-content`, e NÃO `place-content`: centralizar nos dois eixos faz a
-       trilha ser dimensionada pelo conteúdo, e aí o `width: 100%` da imagem
-       vira referência circular e ela colapsa para 0x0 — medido. Centralizando
-       só na vertical, a imagem continua esticada na horizontal. */
-    align-content: center;
-  }
-  .s-transicao__foto {
-    width: 100%;
-    height: auto;
-    /* A caixa passa a ter a proporção da própria foto, então `cover` não corta
-       nada: ela aparece inteira, centrada no painel escuro. Quem cobre a tela
-       continua sendo o painel, que é o que o efeito precisa. */
-    aspect-ratio: 1600 / 777;
-  }
+/* Tela EM PÉ: a foto desta variante é mais LARGA que alta (998x812) e o
+   painel tem uma dobra de altura. Não cabe: com `cover` o navegador ampliaria
+   3,41x para encher a altura e jogaria fora 62% da largura, sobrando uma
+   pessoa das três; com `contain` sobrariam 62% do painel vazios acima dela.
+
+   Então quem cede é o PAINEL, não a foto: aqui ele larga a altura de uma
+   dobra e passa a ter exatamente a altura da imagem. A foto aparece inteira,
+   nítida, ocupando toda a largura, e não há sobra nenhuma para preencher.
+
+   Custo aceito pelo cliente em 2026-08-26: no celular a seção deixa de cobrir
+   a tela toda, então a transição vira uma faixa que sobe por cima do
+   Manifesto em vez de cobri-lo inteiro. Em tela deitada nada muda — lá o
+   painel continua com `height: 100dvh` e a foto dos cinco com `cover`.
+
+   `sobrepor.js` não é afetado: ele mede só a seção de cima (`[data-sobrepor-
+   base]`) para calcular `--topo-preso`, e nunca lê a altura desta. */
+@media (max-aspect-ratio: 3 / 4) {
+  .c-sobrepor__cobre { height: auto; }
+  .s-transicao__foto { height: auto; }
 }
+
+/* Aqui existia um tratamento de faixa para telas estreitas: a foto aparecia
+   inteira, na proporção 1600/777, centrada no painel. O painel continua com
+   uma dobra de altura, então sobrava PRETO em cima e embaixo da faixa — foi
+   exatamente isso que incomodou o cliente em 2026-08-26, e a regra saiu.
+
+   Agora a foto usa `cover` em qualquer largura, como já fazia no desktop: ela
+   preenche o painel e não sobra fundo. O custo é o corte, que numa dobra
+   retrato é grande — `object-position: 50% 42%` acima é o que segura os rostos
+   dentro do enquadramento.
+
+   Com o viewport travado em 1280px (index.html) esta regra já não valia no
+   celular, porque nenhuma @media de largura dispara mais. Ela só ainda pegava
+   janela de desktop estreitada, que ignora o meta viewport — e era ali que o
+   preto sobrevivia. */
 
 /* Movimento reduzido: sem prender e sem sobrepor. As duas seções voltam a ser
    blocos normais, um depois do outro (site.md §12). */

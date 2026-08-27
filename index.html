@@ -2,7 +2,13 @@
 <html lang="pt-BR">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<!-- Largura fixa de 1280px por decisão do cliente em 2026-08-26: o celular
+     renderiza o MESMO layout do desktop, apenas reduzido para caber na tela.
+     Consequência aceita: o texto sai pequeno e o visitante dá pinch-zoom.
+     Zoom continua liberado de propósito — sem user-scalable=no.
+     Para voltar ao responsivo, troque por width=device-width, initial-scale=1:
+     todas as @media (max-width: …) do projeto voltam a valer sozinhas. -->
+<meta name="viewport" content="width=1280">
 <title>Mosaico — Barbearia e cabeleireiro</title>
 <meta name="theme-color" content="#141311">
 <link rel="canonical" href="https://mosaico.vercel.app/">
@@ -83,11 +89,30 @@
       </div>
     </section>
     <section class="s-transicao c-sobrepor__cobre" aria-label="Platinado Concept" data-sobrepor-cobre>
+      <!-- Direcao de arte por FORMATO de tela, e nao por largura: com o viewport
+           travado em 1280px, media queries de largura nao distinguem mais
+           celular de monitor. Em tela em pe entram apenas os TRES; em tela
+           deitada, a original com os cinco lado a lado.
+           A variante de tela em pe e images/Segundafoto.png, entregue pelo
+           cliente em 2026-08-26, so convertida para JPEG: 998x812, sem corte
+           e sem nada acrescentado. O PNG tinha canal alfa totalmente opaco,
+           1,4 MB que viraram 240 KB sem perder um pixel.
+           Ela e mais LARGA que alta, e o painel da transicao e alto. Quem cede
+           e o painel: veja em sections.css a regra que dissolve a altura de
+           uma dobra em @media (max-aspect-ratio: 3/4). NAO tentar resolver
+           pela imagem — cortar, esticar fundo, borrar copia ampliada: as tres
+           foram tentadas e recusadas no mesmo dia.
+           A ordem importa: o navegador usa a PRIMEIRA <source> que casar. -->
       <picture>
-        <source media="(min-width: 768px)" type="image/avif"
-                srcset="/assets/img/transicao/platinado.avif" width="1600" height="777">
+        <!-- JPEG, e nao AVIF: o encoder AVIF do macOS (sips e ImageIO) gera aqui
+             um arquivo que o Chrome le a dimensao mas renderiza PRETO — medido,
+             em todas as qualidades e tamanhos. Sem encoder AVIF confiavel nesta
+             maquina, esta variante fica em JPEG ate alguem gerar o AVIF com
+             ferramenta propria (avifenc, squoosh). -->
+        <source media="(max-aspect-ratio: 3 / 4)" type="image/jpeg"
+                srcset="/assets/img/transicao/platinado-retrato.jpg" width="998" height="812">
         <source type="image/avif"
-                srcset="/assets/img/transicao/platinado-mobile.avif" width="900" height="437">
+                srcset="/assets/img/transicao/platinado.avif" width="1536" height="746">
         <img class="s-transicao__foto" src="/assets/img/transicao/platinado.jpeg"
               width="1600" height="777" loading="eager" fetchpriority="low" decoding="async"
               alt="Cinco clientes da Mosaico com o cabelo descolorido e colorido em rosa, branco, verde e azul.">

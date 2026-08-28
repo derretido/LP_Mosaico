@@ -11,6 +11,11 @@ const INCLINACAO = 0.42;      // vy/vx: quanto o zigue-zague desce a cada ida
 const RAIO_CURSOR = 0.105;
 const RAIO_VULTO = 0.095;
 const TETO_PIXELS = 2.6e6;    // proteção para telas muito grandes
+const TETO_TOQUE = 5e5;       // teto duro no toque: o viewport está travado em
+                              // 1280px CSS (index.html), então a caixa do canvas
+                              // é ~1280x2775 mesmo no celular — sem limite, nem
+                              // GPU de iPhone recente aguenta o shader de tela
+                              // cheia a cada quadro
 
 function compilar(gl, tipo, fonte) {
   const s = gl.createShader(tipo);
@@ -60,7 +65,7 @@ function alvoRastro(gl, lado) {
   return { tex, fbo };
 }
 
-export default function TintaNeon({ escalaDesktop = 0.75, escalaMobile = 0.55 }) {
+export default function TintaNeon({ escalaDesktop = 0.75, escalaMobile = 0.5 }) {
   const refCanvas = useRef(null);
 
   useEffect(() => {
@@ -78,7 +83,12 @@ export default function TintaNeon({ escalaDesktop = 0.75, escalaMobile = 0.55 })
     if (!gl) return undefined;
 
     const semMovimento = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    const ehMobile = window.matchMedia('(max-width: 767px)').matches;
+    // Toque, não largura: o viewport está travado em 1280px (index.html), então
+    // `max-width: 767px` sozinho nunca casa no celular. `pointer: coarse` casa,
+    // e a largura fica de reserva para um navegador estreito de verdade.
+    const ehMobile =
+      window.matchMedia('(pointer: coarse)').matches ||
+      window.matchMedia('(max-width: 767px)').matches;
 
     // No celular o shader roda numa versão mais barata: menos oitavas de ruído
     // e sem as camadas de detalhe fino (gota, segundo cume, terceira deformação)
@@ -212,8 +222,9 @@ export default function TintaNeon({ escalaDesktop = 0.75, escalaMobile = 0.55 })
       let w = Math.max(1, Math.round(larguraCss * dpr * escala));
       let h = Math.max(1, Math.round(alturaCss * dpr * escala));
       const total = w * h;
-      if (total > TETO_PIXELS) {
-        const k = Math.sqrt(TETO_PIXELS / total);
+      const teto = ehMobile ? TETO_TOQUE : TETO_PIXELS;
+      if (total > teto) {
+        const k = Math.sqrt(teto / total);
         w = Math.max(1, Math.round(w * k));
         h = Math.max(1, Math.round(h * k));
       }

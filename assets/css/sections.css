@@ -60,9 +60,12 @@
   opacity: calc(.28 * var(--progresso));
 }
 
-/* No celular a pista é mais curta: com o polegar, uma dobra inteira presa
-   passa a sensação de que a página travou. */
-@media (max-width: 767px) {
+/* No celular a pista é mais curta e o palco encolhe menos. `pointer: coarse`
+   além da largura porque o viewport travado em 1280px (index.html) impede a
+   media query de largura de casar no telefone — sem isso, `--escala-final`
+   (calculada por hero-scroll.js) sai ~0.13 e o palco encolhe para 13% com o
+   `border-radius` animado repintando o canvas de tela cheia a cada quadro. */
+@media (max-width: 767px), (pointer: coarse) {
   .s-hero { --hero-pista: 62svh; }
   /* Só a escala (que o compositor resolve) acompanha a rolagem. O raio deixa
      de ser animado: recalcular `border-radius` por quadro repinta o palco
@@ -73,6 +76,9 @@
     scale: calc(1 - .24 * var(--progresso));
     border-radius: 0;
   }
+  /* A marca aparece inteira, sem a varredura por rolagem: animar `clip-path`
+     por quadro repinta o bloco de texto a cada quadro da rolagem. */
+  .s-hero__marca { clip-path: none; }
 }
 
 /* Sem animação de rolagem quando o sistema pede movimento reduzido: a pista

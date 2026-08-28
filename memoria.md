@@ -131,6 +131,13 @@ Cada entrada é datada. Entradas novas vão no topo de cada área.
 
 ## Alterações realizadas
 
+**2026-08-27 (rodada 4) — Detecção de celular trocada de largura para `pointer`, sem tocar no layout da hero.** A rodada 3 (commit `6611835`, revertida em `9f9f8c7`) fez a coisa certa no diagnóstico mas exagerou na execução: além de trocar o gancho, deixou a hero do celular ESTÁTICA (`position: static`, sem `scale`, sem `sticky`), e foi provavelmente isso que "piorou" para o cliente. Esta rodada refaz só a parte segura, com o cliente pedindo explicitamente para **manter os shaders animando, só mais leves**:
+
+- **`src/efeito/TintaNeon.jsx`** — `ehMobile` passou a ser `matchMedia('(pointer: coarse)') || matchMedia('(max-width: 767px)')`. Agora ligam de verdade no aparelho as reduções que já existiam (shader `LEVE`, 30fps, DPR 1, rastro 256, pausa na rolagem). Entrou `TETO_TOQUE = 5e5` — teto duro de pixels do canvas, porque no viewport travado a caixa CSS é ~1280×2775. `escalaMobile` 0,55 → 0,5.
+- **`src/efeito/main.jsx`** — topografia passou a montar por `matchMedia('(pointer: fine)')` em vez de `'(min-width: 768px)'`. No celular ela deixa de montar os cinco contextos WebGL, o que **só restaura a decisão de 2026-08-22** (que o bug do viewport travado tinha desfeito).
+- **`assets/css/sections.css`** — o bloco de mobile da hero (encolhimento suave de 24%, `border-radius` não animado, marca sem varredura por `clip-path`) passou a valer também em `(pointer: coarse)`. Antes nunca disparava no celular, então `--escala-final` saía ~0,13 e o palco encolhia a 13% com o raio animado repintando o canvas por quadro.
+- **NÃO tocado**, de propósito: `hero-scroll.js`, `retrato-3d.js`, o `position: sticky` e o encolhimento da hero, o bloco `@media (prefers-reduced-motion: reduce)`, o leque e o desktop.
+
 **2026-08-27 — Leque de "Nas redes" trocado de rolagem para auto-play na entrada da seção.**
 
 **JavaScript (`assets/js/leque.js`).** Saíram o listener de `scroll`, o de `resize`, o `requestAnimationFrame` e a função `medir()` que convertia a posição do palco em `--abertura`. Entrou um `IntersectionObserver` de disparo único (`threshold: 0.35` sobre o palco) que vira `--abertura` de 0 para 1 e para de observar. Sob movimento reduzido ou sem `IntersectionObserver`, o módulo retorna cedo e o leque nasce aberto pelo padrão do CSS (`design.md` §11).

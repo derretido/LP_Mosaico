@@ -2,7 +2,7 @@ import { useEffect, useRef } from 'react';
 import { VERT, FRAG_TINTA, FRAG_RASTRO } from './tintaShaders';
 import './TintaNeon.css';
 
-const LADO_RASTRO = 512;      // buffer do rastro: é a máscara que revela a tinta
+const LADO_RASTRO = 512;      // buffer do rastro no desktop; no celular cai para 256
 const ATRASO_VULTO = 1600;    // ms parado até o vulto assumir
 const VEL_VULTO = 0.30;       // uv por segundo — atravessa a dobra em ~3s
 const MARGEM_X = 0.02;        // até onde o vulto encosta na parede lateral
@@ -42,10 +42,10 @@ function programa(gl, fontVert, fontFrag) {
   return p;
 }
 
-function alvoRastro(gl) {
+function alvoRastro(gl, lado) {
   const tex = gl.createTexture();
   gl.bindTexture(gl.TEXTURE_2D, tex);
-  gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA8, LADO_RASTRO, LADO_RASTRO, 0,
+  gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA8, lado, lado, 0,
                 gl.RGBA, gl.UNSIGNED_BYTE, null);
   gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
   gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
@@ -60,7 +60,7 @@ function alvoRastro(gl) {
   return { tex, fbo };
 }
 
-export default function TintaNeon({ escalaDesktop = 0.75, escalaMobile = 0.6 }) {
+export default function TintaNeon({ escalaDesktop = 0.75, escalaMobile = 0.55 }) {
   const refCanvas = useRef(null);
 
   useEffect(() => {
@@ -118,11 +118,23 @@ export default function TintaNeon({ escalaDesktop = 0.75, escalaMobile = 0.6 }) 
       decaimento: gl.getUniformLocation(progRastro, 'uDecaimento')
     };
 
-    let a = alvoRastro(gl);
-    let b = alvoRastro(gl);
-
     // ---- estado -----------------------------------------------------------
     const ehMobile = window.matchMedia('(max-width: 767px)').matches;
+
+    // Buffer do rastro menor no celular: é uma máscara já borrada, 256 basta
+    // e poupa banda de memória da GPU.
+    const ladoRastro = ehMobile ? 256 : LADO_RASTRO;
+
+    // Trava de quadros no celular: a tinta se move devagar (ruído a 0.05..0.13,
+    // vulto a 0.30 uv/s), então 30fps é indistinguível de 60 e corta metade do
+    // trabalho de GPU. ALVO_MS e PISO_ESCALA alimentam o auto-ajuste.
+    const MIN_MS_QUADRO = ehMobile ? 32 : 0;
+    const ALVO_MS = ehMobile ? 1000 / 30 : 1000 / 60;
+    const PISO_ESCALA = ehMobile ? 0.36 : 0.42;
+
+    let a = alvoRastro(gl, ladoRastro);
+    let b = alvoRastro(gl, ladoRastro);
+
     let escala = ehMobile ? escalaMobile : escalaDesktop;
     let largura = 1;
     let altura = 1;
@@ -167,6 +179,7 @@ export default function TintaNeon({ escalaDesktop = 0.75, escalaMobile = 0.6 }) 
     }
 
     let t0 = performance.now();
+    let ultimoDesenho = performance.now();
     let rodando = false;
     let raf = null;
     let visivel = true;
@@ -185,7 +198,7 @@ export default function TintaNeon({ escalaDesktop = 0.75, escalaMobile = 0.6 }) 
         larguraCss = (pai && pai.width) || window.innerWidth || 1;
         alturaCss = (pai && pai.height) || window.innerHeight || 1;
       }
-      const dpr = Math.min(window.devicePixelRatio || 1, ehMobile ? 1.5 : 2);
+      const dpr = Math.min(window.devicePixelRatio || 1, ehMobile ? 1 : 2);
       let w = Math.max(1, Math.round(larguraCss * dpr * escala));
       let h = Math.max(1, Math.round(alturaCss * dpr * escala));
       const total = w * h;
@@ -242,12 +255,12 @@ export default function TintaNeon({ escalaDesktop = 0.75, escalaMobile = 0.6 }) 
 
     function passeRastro() {
       gl.bindFramebuffer(gl.FRAMEBUFFER, b.fbo);
-      gl.viewport(0, 0, LADO_RASTRO, LADO_RASTRO);
+      gl.viewport(0, 0, ladoRastro, ladoRastro);
       gl.useProgram(progRastro);
       gl.activeTexture(gl.TEXTURE0);
       gl.bindTexture(gl.TEXTURE_2D, a.tex);
       gl.uniform1i(uR.anterior, 0);
-      gl.uniform2f(uR.px, 1 / LADO_RASTRO, 1 / LADO_RASTRO);
+      gl.uniform2f(uR.px, 1 / ladoRastro, 1 / ladoRastro);
       gl.uniform2f(uR.cursor, fonte.x, fonte.y);
       gl.uniform2f(uR.cursorAnt, fonte.ax, fonte.ay);
       gl.uniform1f(uR.forca, fonte.forca);
@@ -325,7 +338,13 @@ export default function TintaNeon({ escalaDesktop = 0.75, escalaMobile = 0.6 }) 
 
     function quadro(agora) {
       if (!rodando) return;
-      const inicio = performance.now();
+      raf = requestAnimationFrame(quadro);
+
+      // Trava de 30fps no celular: pula o quadro se veio cedo demais.
+      if (agora - ultimoDesenho < MIN_MS_QUADRO) return;
+      const dtReal = agora - ultimoDesenho;
+      ultimoDesenho = agora;
+
       const tempo = (agora - t0) / 1000;
       const entrada = Math.min(1, tempo / 1.6);   // a tinta surge, não pisca
 
@@ -338,23 +357,28 @@ export default function TintaNeon({ escalaDesktop = 0.75, escalaMobile = 0.6 }) 
       fonte.ay = fonte.y;
       cursor.forca *= 0.82;  // solta rápido assim que o cursor para
 
-      somaQuadros += performance.now() - inicio;
-      amostras++;
-      if (amostras >= 90) {
+      // Mede o intervalo REAL entre quadros, não o tempo de CPU em volta do
+      // drawArrays: numa GPU de celular o custo do shader só aparece aqui.
+      // Passou de 1.5x o alvo por 60 quadros seguidos, a resolução encolhe.
+      if (dtReal < 200) {
+        somaQuadros += dtReal;
+        amostras++;
+      }
+      if (amostras >= 60) {
         const medio = somaQuadros / amostras;
         amostras = 0;
         somaQuadros = 0;
-        if (medio > 12 && escala > 0.42) {
-          escala = Math.max(0.42, escala * 0.8);
+        if (medio > ALVO_MS * 1.5 && escala > PISO_ESCALA) {
+          escala = Math.max(PISO_ESCALA, escala * 0.8);
           dimensionar();
         }
       }
-      raf = requestAnimationFrame(quadro);
     }
 
     function iniciar() {
       if (rodando || semMovimento) return;
       rodando = true;
+      ultimoDesenho = performance.now();
       raf = requestAnimationFrame(quadro);
     }
     function parar() {

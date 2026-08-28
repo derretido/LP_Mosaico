@@ -78,11 +78,20 @@ export default function TintaNeon({ escalaDesktop = 0.75, escalaMobile = 0.55 })
     if (!gl) return undefined;
 
     const semMovimento = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const ehMobile = window.matchMedia('(max-width: 767px)').matches;
+
+    // No celular o shader roda numa versão mais barata: menos oitavas de ruído
+    // e sem as camadas de detalhe fino (gota, segundo cume, terceira deformação)
+    // que quase não se veem numa tela pequena e atrás do grão. A silhueta e a
+    // paleta são as mesmas.
+    const fragTinta = ehMobile
+      ? FRAG_TINTA.replace('precision highp float;', 'precision highp float;\n#define LEVE 1')
+      : FRAG_TINTA;
 
     let progTinta;
     let progRastro;
     try {
-      progTinta = programa(gl, VERT, FRAG_TINTA);
+      progTinta = programa(gl, VERT, fragTinta);
       progRastro = programa(gl, VERT, FRAG_RASTRO);
     } catch (erro) {
       console.error('[tinta-neon]', erro.message);
@@ -119,7 +128,6 @@ export default function TintaNeon({ escalaDesktop = 0.75, escalaMobile = 0.55 })
     };
 
     // ---- estado -----------------------------------------------------------
-    const ehMobile = window.matchMedia('(max-width: 767px)').matches;
 
     // Buffer do rastro menor no celular: é uma máscara já borrada, 256 basta
     // e poupa banda de memória da GPU.
@@ -183,6 +191,8 @@ export default function TintaNeon({ escalaDesktop = 0.75, escalaMobile = 0.55 })
     let rodando = false;
     let raf = null;
     let visivel = true;
+    let rolando = false;          // celular: pausa o shader enquanto a página rola
+    let timerRolagem = null;
     let amostras = 0;
     let somaQuadros = 0;
 
@@ -376,7 +386,7 @@ export default function TintaNeon({ escalaDesktop = 0.75, escalaMobile = 0.55 })
     }
 
     function iniciar() {
-      if (rodando || semMovimento) return;
+      if (rodando || semMovimento || rolando) return;
       rodando = true;
       ultimoDesenho = performance.now();
       raf = requestAnimationFrame(quadro);
@@ -386,6 +396,26 @@ export default function TintaNeon({ escalaDesktop = 0.75, escalaMobile = 0.55 })
       if (raf) cancelAnimationFrame(raf);
       raf = null;
     }
+
+    /* No celular, a GPU é compartilhada entre o shader e o compositor da
+       rolagem: um shader de tela cheia a cada quadro faz o scroll engasgar.
+       Enquanto o dedo rola, o laço para e o último quadro fica congelado na
+       tela — imperceptível, porque tudo está passando —, e volta 180ms depois
+       que a rolagem cessa. t0 é adiantado pela pausa para a animação não pular. */
+    const aoRolar = () => {
+      if (!rolando) {
+        rolando = true;
+        parar();
+      }
+      clearTimeout(timerRolagem);
+      timerRolagem = setTimeout(() => {
+        rolando = false;
+        if (visivel && !document.hidden) {
+          t0 += performance.now() - ultimoDesenho;
+          iniciar();
+        }
+      }, 180);
+    };
 
     dimensionar();
     // Um quadro imediato: a tinta já está lá quando a página aparece,
@@ -398,6 +428,7 @@ export default function TintaNeon({ escalaDesktop = 0.75, escalaMobile = 0.55 })
       window.addEventListener('touchstart', aoTocar, { passive: true });
       window.addEventListener('touchmove', aoTocar, { passive: true });
       window.addEventListener('mouseout', aoSair, { passive: true });
+      if (ehMobile) window.addEventListener('scroll', aoRolar, { passive: true });
     }
 
     const aoVisibilidade = () => {
@@ -434,6 +465,7 @@ export default function TintaNeon({ escalaDesktop = 0.75, escalaMobile = 0.55 })
 
     return () => {
       parar();
+      clearTimeout(timerRolagem);
       io.disconnect();
       ro.disconnect();
       document.removeEventListener('visibilitychange', aoVisibilidade);
@@ -441,6 +473,7 @@ export default function TintaNeon({ escalaDesktop = 0.75, escalaMobile = 0.55 })
       window.removeEventListener('touchstart', aoTocar);
       window.removeEventListener('touchmove', aoTocar);
       window.removeEventListener('mouseout', aoSair);
+      window.removeEventListener('scroll', aoRolar);
       gl.deleteProgram(progTinta);
       gl.deleteProgram(progRastro);
       gl.deleteBuffer(vbo);

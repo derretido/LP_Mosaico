@@ -64,7 +64,15 @@
    passa a sensação de que a página travou. */
 @media (max-width: 767px) {
   .s-hero { --hero-pista: 62svh; }
-  .s-hero__palco { scale: calc(1 - .24 * var(--progresso)); }
+  /* Só a escala (que o compositor resolve) acompanha a rolagem. O raio deixa
+     de ser animado: recalcular `border-radius` por quadro repinta o palco
+     inteiro — canvas incluído — e é uma das fontes de engasgo no celular.
+     O palco encolhe só 24% e continua cobrindo a tela, então o arredondamento
+     quase não aparecia. */
+  .s-hero__palco {
+    scale: calc(1 - .24 * var(--progresso));
+    border-radius: 0;
+  }
 }
 
 /* Sem animação de rolagem quando o sistema pede movimento reduzido: a pista

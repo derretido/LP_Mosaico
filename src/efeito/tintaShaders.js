@@ -53,6 +53,15 @@ void main() {
 export const FRAG_TINTA = `#version 300 es
 precision highp float;
 
+/* LEVE é definido pelo JavaScript no celular: menos oitavas de fbm e sem as
+   camadas de detalhe fino, para o shader caber na GPU do aparelho. A silhueta,
+   a paleta e o movimento são os mesmos. */
+#ifdef LEVE
+  #define FBM_OCT 3
+#else
+  #define FBM_OCT 4
+#endif
+
 in vec2 vUv;
 out vec4 fragColor;
 
@@ -119,7 +128,7 @@ float snoise(vec3 v) {
 float fbm(vec3 p) {
   float a = 0.5;
   float s = 0.0;
-  for (int i = 0; i < 4; i++) {
+  for (int i = 0; i < FBM_OCT; i++) {
     s += a * snoise(p);
     p = p * 2.03 + vec3(11.3, 7.7, 3.1);
     a *= 0.5;
@@ -218,9 +227,12 @@ void main() {
   vec2 w2 = vec2(fbm(vec3(q * 5.0, t * 0.10)),
                  fbm(vec3(q * 5.0 + 17.0, t * 0.10)));
   q += 0.052 * w2;
+#ifndef LEVE
+  // Terceira deformação: detalhe fino do contorno, amplitude 0.013.
   vec2 w3 = vec2(snoise(vec3(q * 14.0, t * 0.13)),
                  snoise(vec3(q * 14.0 + 5.0, t * 0.13)));
   q += 0.013 * w3;
+#endif
 
   // O cursor empurra a tinta para fora e engrossa a região por onde passou.
   vec2 dc = p - uCursor;
@@ -228,7 +240,10 @@ void main() {
   q += normalize(dc + 1e-5) * rastro * 0.055;
   q += normalize(dc + 1e-5) * exp(-distc * distc / 0.012) * uCursorForca * 0.03;
 
-  float f = campoManchas(q, t, ext, escalaR) + campoGotas(q, t, ext, escalaR);
+  float f = campoManchas(q, t, ext, escalaR);
+#ifndef LEVE
+  f += campoGotas(q, t, ext, escalaR);   // respingos finos
+#endif
   f *= 1.0 + 0.46 * fbm(vec3(q * 4.0, t * 0.07));
   // Cumes de ruído aplicados só na faixa da borda: é o que abre os picos,
   // as ramificações finas e as extensões de tinta se espalhando.
@@ -237,9 +252,11 @@ void main() {
   float e1 = (f - 1.0) * 1.6;
   float cume = 1.0 - abs(snoise(vec3(q * 6.5, t * 0.05)));
   f += cume * cume * 0.36 * exp(-e1 * e1);
+#ifndef LEVE
   float e2 = (f - 1.0) * 2.6;
   float cume2 = 1.0 - abs(snoise(vec3(q * 15.0, t * 0.08)));
   f += cume2 * cume2 * 0.16 * exp(-e2 * e2);
+#endif
   f += rastro * 0.18;   // leve inchaço onde passou; revelar é o papel principal
   f *= mix(0.34, 1.0, uEntrada);
 

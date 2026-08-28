@@ -11,6 +11,10 @@ const INCLINACAO = 0.42;      // vy/vx: quanto o zigue-zague desce a cada ida
 const RAIO_CURSOR = 0.105;
 const RAIO_VULTO = 0.095;
 const TETO_PIXELS = 2.6e6;    // proteção para telas muito grandes
+const TETO_TOQUE = 4.5e5;     // teto duro no celular: o viewport é travado em
+                              // 1280px CSS (index.html), então sem este limite
+                              // o canvas mediria ~1280x2775 e a GPU do aparelho
+                              // não dá conta, nem a de um iPhone recente
 
 function compilar(gl, tipo, fonte) {
   const s = gl.createShader(tipo);
@@ -60,7 +64,7 @@ function alvoRastro(gl, lado) {
   return { tex, fbo };
 }
 
-export default function TintaNeon({ escalaDesktop = 0.75, escalaMobile = 0.55 }) {
+export default function TintaNeon({ escalaDesktop = 0.75, escalaMobile = 0.5 }) {
   const refCanvas = useRef(null);
 
   useEffect(() => {
@@ -78,13 +82,18 @@ export default function TintaNeon({ escalaDesktop = 0.75, escalaMobile = 0.55 })
     if (!gl) return undefined;
 
     const semMovimento = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    const ehMobile = window.matchMedia('(max-width: 767px)').matches;
+    // NÃO por largura: o viewport está travado em 1280px (index.html, decisão de
+    // 2026-08-26), então `max-width: 767px` nunca casa no celular e todas as
+    // reduções abaixo ficavam desligadas justamente no aparelho. `pointer:
+    // coarse` é o gancho que separa toque de mouse — o mesmo que o CSS do
+    // retrato já usa.
+    const ehToque = window.matchMedia('(pointer: coarse)').matches;
 
-    // No celular o shader roda numa versão mais barata: menos oitavas de ruído
+    // No toque o shader roda numa versão mais barata: menos oitavas de ruído
     // e sem as camadas de detalhe fino (gota, segundo cume, terceira deformação)
     // que quase não se veem numa tela pequena e atrás do grão. A silhueta e a
     // paleta são as mesmas.
-    const fragTinta = ehMobile
+    const fragTinta = ehToque
       ? FRAG_TINTA.replace('precision highp float;', 'precision highp float;\n#define LEVE 1')
       : FRAG_TINTA;
 
@@ -129,21 +138,21 @@ export default function TintaNeon({ escalaDesktop = 0.75, escalaMobile = 0.55 })
 
     // ---- estado -----------------------------------------------------------
 
-    // Buffer do rastro menor no celular: é uma máscara já borrada, 256 basta
+    // Buffer do rastro menor no toque: é uma máscara já borrada, 256 basta
     // e poupa banda de memória da GPU.
-    const ladoRastro = ehMobile ? 256 : LADO_RASTRO;
+    const ladoRastro = ehToque ? 256 : LADO_RASTRO;
 
-    // Trava de quadros no celular: a tinta se move devagar (ruído a 0.05..0.13,
+    // Trava de quadros no toque: a tinta se move devagar (ruído a 0.05..0.13,
     // vulto a 0.30 uv/s), então 30fps é indistinguível de 60 e corta metade do
     // trabalho de GPU. ALVO_MS e PISO_ESCALA alimentam o auto-ajuste.
-    const MIN_MS_QUADRO = ehMobile ? 32 : 0;
-    const ALVO_MS = ehMobile ? 1000 / 30 : 1000 / 60;
-    const PISO_ESCALA = ehMobile ? 0.36 : 0.42;
+    const MIN_MS_QUADRO = ehToque ? 32 : 0;
+    const ALVO_MS = ehToque ? 1000 / 30 : 1000 / 60;
+    const PISO_ESCALA = ehToque ? 0.30 : 0.42;
 
     let a = alvoRastro(gl, ladoRastro);
     let b = alvoRastro(gl, ladoRastro);
 
-    let escala = ehMobile ? escalaMobile : escalaDesktop;
+    let escala = ehToque ? escalaMobile : escalaDesktop;
     let largura = 1;
     let altura = 1;
 
@@ -208,12 +217,13 @@ export default function TintaNeon({ escalaDesktop = 0.75, escalaMobile = 0.55 })
         larguraCss = (pai && pai.width) || window.innerWidth || 1;
         alturaCss = (pai && pai.height) || window.innerHeight || 1;
       }
-      const dpr = Math.min(window.devicePixelRatio || 1, ehMobile ? 1 : 2);
+      const dpr = Math.min(window.devicePixelRatio || 1, ehToque ? 1 : 2);
       let w = Math.max(1, Math.round(larguraCss * dpr * escala));
       let h = Math.max(1, Math.round(alturaCss * dpr * escala));
       const total = w * h;
-      if (total > TETO_PIXELS) {
-        const k = Math.sqrt(TETO_PIXELS / total);
+      const teto = ehToque ? TETO_TOQUE : TETO_PIXELS;
+      if (total > teto) {
+        const k = Math.sqrt(teto / total);
         w = Math.max(1, Math.round(w * k));
         h = Math.max(1, Math.round(h * k));
       }
@@ -428,7 +438,13 @@ export default function TintaNeon({ escalaDesktop = 0.75, escalaMobile = 0.55 })
       window.addEventListener('touchstart', aoTocar, { passive: true });
       window.addEventListener('touchmove', aoTocar, { passive: true });
       window.addEventListener('mouseout', aoSair, { passive: true });
-      if (ehMobile) window.addEventListener('scroll', aoRolar, { passive: true });
+      if (ehToque) {
+        // Congela o shader durante a rolagem: no toque, GPU e compositor
+        // disputam o mesmo hardware. `touchmove` além de `scroll` porque na
+        // rolagem por impulso o `scroll` chega atrasado.
+        window.addEventListener('scroll', aoRolar, { passive: true });
+        window.addEventListener('touchmove', aoRolar, { passive: true });
+      }
     }
 
     const aoVisibilidade = () => {
@@ -474,6 +490,7 @@ export default function TintaNeon({ escalaDesktop = 0.75, escalaMobile = 0.55 })
       window.removeEventListener('touchmove', aoTocar);
       window.removeEventListener('mouseout', aoSair);
       window.removeEventListener('scroll', aoRolar);
+      window.removeEventListener('touchmove', aoRolar);
       gl.deleteProgram(progTinta);
       gl.deleteProgram(progRastro);
       gl.deleteBuffer(vbo);

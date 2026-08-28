@@ -34,16 +34,20 @@ const PALETAS = {
   claro: { low: '#D8D4CB', mid: '#C6C1B7', high: '#AEA99E', opacidade: 1 }
 };
 
-/* A topografia só existe a partir do tablet. São CINCO camadas: no celular
-   elas somariam cinco contextos WebGL ao da tinta da hero, num orçamento de
+/* A topografia só existe com MOUSE (desktop). São CINCO camadas: no toque elas
+   somariam cinco contextos WebGL ao da tinta da hero, num orçamento de
    desempenho que site.md §13 já dá como estourado, e justamente no aparelho
    com menos memória e menos GPU. Decisão do cliente em 2026-08-22.
 
-   Montagem e desmontagem seguem a media query em vez de olhar a largura uma
-   vez só: um tablet girado atravessa os 768px, e a limpeza do componente
-   libera o contexto de verdade (loseContext), então desmontar devolve
-   memória em vez de só esconder a camada. */
-const FAIXA_TOPOGRAFIA = window.matchMedia('(min-width: 768px)');
+   O gancho é `pointer: fine`, NÃO `min-width: 768px`: o viewport está travado
+   em 1280px (index.html, 2026-08-26), então a largura casa sempre e a
+   topografia estava montando os seis contextos no celular — uma das causas do
+   engasgo ao rolar o site, corrigida em 2026-08-27.
+
+   Montagem e desmontagem seguem a media query em vez de olhar uma vez só: a
+   limpeza do componente libera o contexto de verdade (loseContext), então
+   desmontar devolve memória em vez de só esconder a camada. */
+const FAIXA_TOPOGRAFIA = window.matchMedia('(pointer: fine)');
 const raizes = new Map();
 
 function montarTopografia() {

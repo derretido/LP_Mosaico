@@ -75,14 +75,19 @@
   }
 }
 
-/* Sem animação de rolagem quando o sistema pede movimento reduzido: a pista
-   encolhe para uma dobra e o palco deixa de ser preso (site.md §12). */
-@media (prefers-reduced-motion: reduce) {
+/* Sem animação de rolagem quando o sistema pede movimento reduzido (site.md §12)
+   OU no toque. No celular o viewport está travado em 1280px (index.html), então:
+   (a) as @media de largura nunca casam e a versão "mobile" da hero não existia;
+   (b) `hero-scroll.js` calculava `--escala-final` por `ALVO_ALTURA / innerHeight`
+   com innerHeight ~2775, dando ~0.13 — o palco encolhia para 13% e o
+   `border-radius` animado passava de 300px por quadro, repintando um canvas de
+   tela cheia. Era a causa principal do engasgo no iPhone. No toque a hero passa
+   a ser uma dobra fixa que rola normal: palco solto, sem escala, sem raio
+   animado, sem véu, marca inteira. O `hero-scroll.js` também para nesse caso. */
+@media (prefers-reduced-motion: reduce), (pointer: coarse) {
   .s-hero { height: 100svh; }
-  .s-hero__palco { position: static; scale: 1; border-radius: 0; }
+  .s-hero__palco { position: static; scale: 1; border-radius: 0; will-change: auto; }
   .s-hero__palco::before { opacity: 0; }
-  /* Sem a animação de rolagem o progresso fica em 0 e nada seria revelado:
-     aqui a marca aparece inteira, de uma vez. */
   .s-hero__marca { clip-path: none; }
 }
 /* Camada da tinta neon: ocupa a dobra inteira, no fundo de tudo.

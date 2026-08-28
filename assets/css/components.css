@@ -1029,6 +1029,17 @@ body.is-travado { overflow: hidden; }
   inherits: false;
   initial-value: 1;
 }
+/* `--abertura` registrada para poder ser TRANSICIONADA: é a transição sobre
+   ela, em `.c-leque`, que abre o leque quando o leque.js vira a chave de 0
+   para 1 ao entrar na tela. As cartas leem `--ab` (um `calc` sobre
+   `--abertura`), que recalcula a cada quadro e leva translate/rotate/scale
+   junto — o mesmo encanamento de antes, só que agora o motor é a transição
+   e não a rolagem. */
+@property --abertura {
+  syntax: "<number>";
+  inherits: true;
+  initial-value: 1;
+}
 
 .c-leque {
   position: relative;
@@ -1043,7 +1054,10 @@ body.is-travado { overflow: hidden; }
      escreve. Declarado na carta, ele venceria o valor herdado e o que o
      JavaScript escreve nunca chegaria — declaração local ganha de herança.
      O valor padrão é 1 (leque aberto), para que sem JavaScript e sob
-     movimento reduzido a composição apareça inteira, como design.md §11 pede. */
+     movimento reduzido a composição apareça inteira, como design.md §11 pede.
+     Com JavaScript, o leque.js baixa para 0, arma a transição (classe
+     `is-leque-armado`, para o estado fechado não animar no carregamento) e a
+     abertura toca em ~1,5s quando a seção entra na tela. */
   --abertura: 1;
 
   --carta-w: clamp(160px, 17vw, 270px);
@@ -1051,6 +1065,10 @@ body.is-travado { overflow: hidden; }
   --passo-r: 5deg;                         /* giro por carta */
   --passo-y: 16px;                         /* altura do arco, por unidade */
   --recuo: .04;                            /* quanto cada carta encolhe */
+}
+/* Transição armada pelo leque.js só depois de assentar o estado fechado. */
+.c-leque.is-leque-armado {
+  transition: --abertura 1.5s var(--e-entrada);
 }
 .c-leque__carta {
   position: absolute;
@@ -1144,6 +1162,7 @@ body.is-travado { overflow: hidden; }
 }
 
 @media (prefers-reduced-motion: reduce) {
+  .c-leque.is-leque-armado { transition: none; }
   .c-leque__carta { transition: none; }
   .c-leque__carta:hover { --realce: 1; }
 }

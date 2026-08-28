@@ -1,11 +1,15 @@
-/* leque.js — galeria em leque de cartas, aberta pela rolagem.
+/* leque.js — galeria em leque de cartas, aberta ao entrar na tela.
 
    Divisão de trabalho, igual à da hero: este módulo NÃO anima nada. Ele só
-   (a) monta as cartas a partir de uma lista de dados e (b) escreve `--abertura`
-   de 0 a 1 conforme a seção atravessa a tela. Quem desenha o leque é o CSS, em
-   `translate`, `rotate` e `scale` — propriedades que o compositor resolve
-   sozinho. Por ser progresso puro, o leque abre ao descer e fecha ao subir, e
-   para junto quando a rolagem para.
+   (a) monta as cartas a partir de uma lista de dados e (b) vira `--abertura`
+   de 0 para 1 UMA VEZ, quando a seção aparece. Quem desenha e quem anima o
+   leque é o CSS, em `translate`, `rotate` e `scale` com uma transição sobre
+   `--abertura` — propriedades que o compositor resolve sozinho.
+
+   Mudança de 2026-08-27: o leque deixou de ser dirigido pelo progresso da
+   rolagem (decisão de 2026-08-22). Agora ele começa fechado — só a carta
+   central à vista — e abre sozinho, em cascata de dentro para fora, quando a
+   seção entra na tela. Não reage mais à rolagem depois disso.
 
    Por que não GSAP: descartado em 2026-08-20 por decisão registrada. Pesaria
    ~70KB sobre um orçamento de JavaScript já estourado, e o `pin` do
@@ -100,49 +104,35 @@ export function iniciarLeque(movimentoReduzido) {
 
   montarCartas(palco, POSTS);
 
-  /* Sob movimento reduzido o leque já nasce aberto: o CSS tem `--abertura: 1`
-     por padrão e nada aqui o altera. O conteúdo aparece completo e imediato,
-     como design.md §11 exige. */
-  if (movimentoReduzido) return;
+  /* Sob movimento reduzido, ou sem IntersectionObserver, o leque já nasce
+     aberto: o CSS tem `--abertura: 1` por padrão e nada aqui o altera. O
+     conteúdo aparece completo e imediato, como design.md §11 exige. */
+  if (movimentoReduzido || !("IntersectionObserver" in window)) return;
 
-  let raf = null;
-  let anterior = -1;
+  /* Com JavaScript e movimento normal, o leque começa FECHADO — todas as
+     cartas empilhadas atrás da central — e abre uma vez quando a seção entra
+     na tela. A transição de `--abertura` e a cascata por `--atraso` moram no
+     CSS; aqui só se vira a chave. Escrito no PALCO, que é onde o CSS declara o
+     valor padrão: declaração local venceria o valor herdado. */
+  palco.style.setProperty("--abertura", "0");
 
-  const medir = () => {
-    raf = null;
-    /* Medido pelo PALCO, não pela seção. O palco fica uns 200px abaixo do topo
-       da seção, depois da etiqueta, do título e do lead: medindo pela seção, o
-       leque terminava de abrir ANTES de entrar na tela, e o efeito não era
-       visto. É a posição do próprio leque que tem de comandar a abertura. */
-    const caixa = palco.getBoundingClientRect();
-    const altura = window.innerHeight;
+  /* Assenta o estado fechado ANTES de armar a transição: sem este reflow, a
+     mudança de 1 (padrão do CSS) para 0 dispararia a transição e o leque
+     fecharia sozinho no carregamento. Com a transição armada só depois, a
+     primeira animação é a abertura, quando a seção aparece. */
+  void palco.offsetWidth;
+  palco.classList.add("is-leque-armado");
 
-    /* Começa a abrir quando o topo do leque encosta na borda de baixo da tela
-       e termina quando o leque está centrado verticalmente. Assim a abertura
-       inteira acontece com o leque à vista. A conta é de posição, não de
-       tempo, então o progresso acompanha a rolagem nos dois sentidos. */
-    const inicio = altura;
-    const fim = altura / 2 - caixa.height / 2;
-    const bruto = (inicio - caixa.top) / (inicio - fim);
-    const abertura = Math.min(1, Math.max(0, bruto));
+  const observador = new IntersectionObserver(
+    (entradas) => {
+      entradas.forEach((e) => {
+        if (!e.isIntersecting) return;
+        palco.style.setProperty("--abertura", "1");
+        observador.unobserve(e.target);   /* uma única vez, design.md §11 */
+      });
+    },
+    { threshold: 0.35 }
+  );
 
-    /* Duas casas bastam para o olho e evitam reescrever o estilo a cada
-       quadro por uma diferença invisível. */
-    const arredondado = Math.round(abertura * 100) / 100;
-    if (arredondado !== anterior) {
-      anterior = arredondado;
-      /* Escrito no PALCO, que é onde o CSS declara o valor padrão. Escrever
-         num ancestral não adiantaria se o padrão estivesse na carta:
-         declaração local vence valor herdado. */
-      palco.style.setProperty("--abertura", String(arredondado));
-    }
-  };
-
-  const agendar = () => {
-    if (raf === null) raf = requestAnimationFrame(medir);
-  };
-
-  medir();
-  addEventListener("scroll", agendar, { passive: true });
-  addEventListener("resize", agendar, { passive: true });
+  observador.observe(palco);
 }

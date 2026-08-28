@@ -18,12 +18,6 @@ export function iniciarHeroScroll(movimentoReduzido) {
   const pista = document.querySelector("[data-hero-pista]");
   if (!pista || movimentoReduzido) return;
 
-  /* No toque a hero é uma dobra fixa (ver sections.css: o mesmo bloco que trata
-     movimento reduzido). Sem isto, `--escala-final` sairia ~0.13 por causa do
-     viewport travado em 1280px, e o palco encolheria a 13% com o raio animado
-     repintando o canvas a cada quadro — o engasgo que o cliente via no iPhone. */
-  if (window.matchMedia("(pointer: coarse)").matches) return;
-
   let raf = null;
   let anterior = -1;
 

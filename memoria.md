@@ -131,14 +131,6 @@ Cada entrada é datada. Entradas novas vão no topo de cada área.
 
 ## Alterações realizadas
 
-**2026-08-27 (rodada 3) — Hero e topografia realmente aliviadas no celular, depois de descobrir que o gancho estava errado.** Ver "Problemas encontrados" da mesma data: o viewport travado em 1280px desligava tudo que dependia de largura. O que mudou:
-
-- **`src/efeito/main.jsx`** — a topografia passou a montar por `matchMedia('(pointer: fine)')` em vez de `'(min-width: 768px)'`. No celular ela não monta mais: de seis contextos WebGL para um, que é o que a decisão de 2026-08-22 sempre quis.
-- **`src/efeito/TintaNeon.jsx`** — `ehMobile` (largura) virou `ehToque` (`pointer: coarse`). Agora ligam de verdade no aparelho: shader `LEVE`, trava de 30fps, DPR 1, rastro 256, e **a pausa na rolagem** (agora também em `touchmove`, porque na rolagem por impulso o `scroll` chega atrasado). Entrou `TETO_TOQUE = 4.5e5` — teto duro de pixels do canvas, porque no viewport travado a caixa CSS é ~1280×2775 e nem a GPU de um iPhone recente dá conta sem limite. Escala inicial no toque 0,55 → 0,5; piso do auto-ajuste 0,36 → 0,30.
-- **`assets/css/sections.css`** — o bloco que zera a animação da hero passou de `@media (prefers-reduced-motion: reduce)` para `@media (prefers-reduced-motion: reduce), (pointer: coarse)`. No toque a hero vira uma dobra fixa: palco solto (sem `sticky`, sem `scale`, sem `border-radius` animado, `will-change: auto`), sem véu, marca inteira. Zero propriedade animada por rolagem na hero.
-- **`assets/js/hero-scroll.js`** — retorna cedo em `pointer: coarse` (a hero é estática ali, não há `--progresso` para escrever).
-- **`assets/js/retrato-3d.js`** — além de `min-width: 768px`, agora exige `pointer: fine`, senão registrava um listener de `mousemove` morto no celular.
-
 **2026-08-27 — Leque de "Nas redes" trocado de rolagem para auto-play na entrada da seção.**
 
 **JavaScript (`assets/js/leque.js`).** Saíram o listener de `scroll`, o de `resize`, o `requestAnimationFrame` e a função `medir()` que convertia a posição do palco em `--abertura`. Entrou um `IntersectionObserver` de disparo único (`threshold: 0.35` sobre o palco) que vira `--abertura` de 0 para 1 e para de observar. Sob movimento reduzido ou sem `IntersectionObserver`, o módulo retorna cedo e o leque nasce aberto pelo padrão do CSS (`design.md` §11).
@@ -414,14 +406,6 @@ Cada entrada é datada. Entradas novas vão no topo de cada área.
 **2026-08-19 — Salvo o link da referência** em `referencias/landonorris.webloc`, ao lado da captura `fotoSite.pdf`.
 
 ## Problemas encontrados
-
-**2026-08-27 — O viewport travado em 1280px (`index.html`, decisão de 2026-08-26) tinha DESLIGADO todas as reduções de celular do projeto — no aparelho onde elas mais importam.** O cliente reportou três vezes que a hero e a rolagem travavam no iPhone 14 Pro, e as duas primeiras rodadas de otimização quase não pegaram porque **estavam todas atrás de `@media (max-width: 767px)` ou de `matchMedia('(max-width: 767px)')`**, e com `<meta name="viewport" content="width=1280">` a página se mede sempre como 1280px de largura, no celular e no monitor. Consequências, todas medidas ou deduzidas da conta:
-
-- **A topografia montava os SEIS contextos WebGL no celular.** O gancho era `matchMedia('(min-width: 768px)')`, que casa sempre. A decisão de 2026-08-22 ("no celular a página vai de seis contextos para um") continuava escrita, mas o mecanismo dela estava quebrado desde 26/08. Provavelmente a maior causa isolada do engasgo ao **rolar o site**.
-- **A hero rodava o shader completo de desktop**: `ehMobile` era falso, então sem trava de 30fps, sem DPR reduzido, sem versão `LEVE`, **sem a pausa na rolagem** (a correção principal da rodada anterior, que nunca chegou a ligar), e o canvas media ~1280×2775 CSS.
-- **O palco da hero encolhia para ~13%, não 76%.** `hero-scroll.js` calcula `--escala-final` como `ALVO_ALTURA / window.innerHeight`, e `innerHeight` no viewport travado é ~2775 → `350/2775 ≈ 0.13`. Junto vinha um `border-radius` animado de mais de 300px por quadro, repintando o canvas de tela cheia a 60fps. O bloco `@media (max-width: 767px)` que deveria dar `scale: 1 - .24 * progresso` nunca disparava.
-
-**A correção: trocar o gancho de largura por `pointer: coarse` / `pointer: fine`** — que é o que o CSS do enquadramento do retrato já usava, com esta mesma justificativa escrita ao lado dele desde 26/08. **Regra geral: enquanto o viewport estiver travado em 1280px, NENHUMA distinção telefone/desktop pode usar largura — nem em `@media`, nem em `matchMedia`. Só `pointer`/`hover`.** Vale varrer o projeto à procura de outros `min-width`/`max-width` usados como se fossem "é celular?".
 
 **2026-08-23 — O `sips` produz AVIF QUEBRADO acima de 1536px de largura: o arquivo carrega, tem as dimensões certas e decodifica PRETO no navegador.** Esta é a causa real do "está tudo preto" da transição, e ela não tem nada a ver com carregamento.
 

@@ -15,10 +15,7 @@ export function iniciarRetrato3d(movimentoReduzido) {
   // uma dobra, o que jogaria a normalização do cursor para fora.
   const hero = document.querySelector("[data-hero-palco]") || document.querySelector("[data-hero]");
   if (!retrato || !hero || movimentoReduzido) return;
-  /* Só com mouse. O viewport travado em 1280px faz `min-width: 768px` casar
-     sempre, mesmo no celular, então o gancho certo é `pointer: fine`. */
   if (!window.matchMedia("(min-width: 768px)").matches) return;
-  if (!window.matchMedia("(pointer: fine)").matches) return;
 
   let destinoX = 0;
   let destinoY = 0;
